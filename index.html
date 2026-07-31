@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Крестики-нолики</title>
+    <title>Соник - Беги и прыгай!</title>
     <style>
-        /* ===== ОБНУЛЕНИЕ ===== */
         * {
             margin: 0;
             padding: 0;
@@ -14,354 +13,1110 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* ===== ФОН ===== */
         body {
+            background: #0a1a2b;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: linear-gradient(145deg, #0b0b1a, #1a1a3e, #0d0d2b);
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            padding: 16px;
-            touch-action: manipulation;
-        }
-
-        /* ===== КАРТОЧКА ===== */
-        .game-container {
-            background: rgba(255, 255, 255, 0.06);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            padding: 24px 20px 30px 20px;
-            border-radius: 48px;
-            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            text-align: center;
-            width: 100%;
-            max-width: 420px;
-            transition: 0.3s;
-        }
-
-        h1 {
-            color: #ffffff;
-            font-size: 28px;
-            font-weight: 700;
-            letter-spacing: 3px;
-            text-shadow: 0 0 40px rgba(255, 255, 255, 0.08);
-            margin-bottom: 4px;
-        }
-        h1 span {
-            background: linear-gradient(135deg, #f093fb, #f5576c);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        /* ===== СТАТУС ===== */
-        #status {
-            color: rgba(255, 255, 255, 0.85);
-            font-size: 22px;
-            font-weight: 500;
-            padding: 10px 0 14px 0;
-            min-height: 58px;
-            letter-spacing: 0.5px;
-            text-shadow: 0 0 20px rgba(255, 255, 255, 0.05);
-        }
-        #status strong {
-            color: #fff;
-            font-weight: 700;
-        }
-        #status .x-color { color: #6fcbff; }
-        #status .o-color { color: #ff9a9e; }
-
-        /* ===== ПОЛЕ 3x3 ===== */
-        .board {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-            max-width: 360px;
-            margin: 0 auto;
-            aspect-ratio: 1 / 1;
-            width: 100%;
-        }
-
-        .cell {
-            background: rgba(255, 255, 255, 0.04);
-            border-radius: 18px;
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: clamp(52px, 18vw, 82px);
-            font-weight: 700;
-            color: #fff;
-            cursor: pointer;
-            transition: 0.15s ease;
-            text-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
-            touch-action: manipulation;
-            aspect-ratio: 1 / 1;
-            box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.03);
-        }
-
-        .cell:active {
-            transform: scale(0.92);
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        /* Цвета для X и O */
-        .cell.x {
-            color: #6fcbff;
-            text-shadow: 0 0 40px rgba(111, 203, 255, 0.25);
-        }
-        .cell.o {
-            color: #ff9a9e;
-            text-shadow: 0 0 40px rgba(255, 154, 158, 0.25);
-        }
-
-        /* Победная подсветка */
-        .cell.win {
-            background: rgba(255, 215, 0, 0.15) !important;
-            border-color: rgba(255, 215, 0, 0.3);
-            box-shadow: 0 0 40px rgba(255, 215, 0, 0.08);
-            animation: pulse-gold 1s ease-in-out infinite alternate;
-        }
-
-        @keyframes pulse-gold {
-            0% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.05); }
-            100% { box-shadow: 0 0 50px rgba(255, 215, 0, 0.2); }
-        }
-
-        /* ===== КНОПКА ===== */
-        .btn-reset {
-            margin-top: 22px;
-            padding: 16px 20px;
-            width: 100%;
-            max-width: 260px;
-            background: linear-gradient(135deg, #f093fb, #f5576c);
-            border: none;
-            border-radius: 60px;
-            color: #fff;
-            font-size: 20px;
-            font-weight: 700;
-            letter-spacing: 1px;
-            cursor: pointer;
-            transition: 0.2s ease;
-            box-shadow: 0 12px 35px rgba(245, 87, 108, 0.35);
-            touch-action: manipulation;
-        }
-
-        .btn-reset:active {
-            transform: scale(0.94);
-            box-shadow: 0 6px 20px rgba(245, 87, 108, 0.5);
-        }
-
-        /* ===== ЗВЁЗДЫ НА ФОНЕ ===== */
-        .stars {
-            position: fixed;
-            inset: 0;
-            pointer-events: none;
-            z-index: -1;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            touch-action: none;
             overflow: hidden;
         }
-        .star {
-            position: absolute;
-            background: white;
-            border-radius: 50%;
-            animation: twinkle var(--duration, 3s) infinite alternate;
-            opacity: var(--opacity, 0.4);
-            width: var(--size, 3px);
-            height: var(--size, 3px);
-            left: var(--x, 50%);
-            top: var(--y, 50%);
-        }
-        @keyframes twinkle {
-            0% { opacity: 0.15; transform: scale(0.8); }
-            100% { opacity: 1; transform: scale(1.4); }
+
+        .game-wrapper {
+            background: linear-gradient(180deg, #4a90d9, #1e3c5a);
+            border-radius: 24px;
+            padding: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7);
+            max-width: 100%;
         }
 
-        /* ===== АДАПТИВ ===== */
-        @media (max-width: 480px) {
-            .game-container {
-                padding: 18px 14px 24px 14px;
-                border-radius: 32px;
-            }
-            h1 { font-size: 22px; }
-            #status { font-size: 18px; min-height: 48px; }
-            .cell { border-radius: 14px; }
-            .btn-reset { font-size: 17px; padding: 14px 16px; }
+        canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            max-width: 800px;
+            background: #87CEEB;
+            border-radius: 16px;
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.2);
+            cursor: pointer;
+            touch-action: none;
+            aspect-ratio: 800 / 400;
         }
 
-        @media (max-width: 380px) {
-            .game-container { padding: 12px 10px 18px 10px; border-radius: 24px; }
-            h1 { font-size: 18px; }
-            #status { font-size: 15px; min-height: 40px; padding: 6px 0 10px 0; }
-            .cell { border-radius: 10px; gap: 5px; }
-            .btn-reset { font-size: 15px; padding: 12px 14px; }
+        .info-panel {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 16px;
+            color: white;
+            font-weight: bold;
+            font-size: 1.1rem;
+            padding: 0 8px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            flex-wrap: wrap;
+            gap: 10px;
         }
 
-        @media (orientation: landscape) and (max-height: 500px) {
-            .game-container { max-width: 340px; padding: 12px 14px 16px 14px; }
-            h1 { font-size: 18px; }
-            #status { font-size: 16px; min-height: 34px; padding: 4px 0 6px 0; }
-            .cell { font-size: clamp(32px, 10vh, 48px); border-radius: 10px; }
-            .board { gap: 5px; }
-            .btn-reset { font-size: 15px; padding: 10px 12px; margin-top: 12px; }
+        .badge {
+            background: rgba(0,0,0,0.3);
+            padding: 8px 16px;
+            border-radius: 40px;
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1rem;
+        }
+
+        .badge span {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .score-badge span { color: #ffd966; }
+        .best-badge span { color: #ff6b6b; }
+        .rings-badge span { color: #ffd700; }
+
+        .restart-btn {
+            background: #f5c542;
+            border: none;
+            border-radius: 40px;
+            padding: 10px 24px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #1e3c5a;
+            box-shadow: 0 4px 0 #b37b2e;
+            transition: all 0.05s ease;
+            cursor: pointer;
+            touch-action: manipulation;
+            border: 2px solid #ffdd77;
+        }
+
+        .restart-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 0px 0 #b37b2e;
+        }
+
+        @media (max-width: 600px) {
+            .game-wrapper { padding: 12px; }
+            .info-panel { font-size: 0.9rem; justify-content: center; }
+            .restart-btn { padding: 8px 18px; font-size: 1rem; }
+            .badge { padding: 6px 12px; }
+            .badge span { font-size: 1.2rem; }
         }
     </style>
 </head>
 <body>
 
-    <!-- ===== ФОН ===== -->
-    <div class="stars" id="stars"></div>
-
-    <!-- ===== ИГРА ===== -->
-    <div class="game-container">
-        <h1>✧ <span>КРЕСТИКИ</span>-НОЛИКИ</h1>
-        <div id="status">Ход: <strong class="x-color">X</strong></div>
-        <div class="board" id="board"></div>
-        <button class="btn-reset" id="resetBtn">⟳ Новая игра</button>
+<div class="game-wrapper">
+    <canvas id="gameCanvas" width="800" height="400"></canvas>
+    <div class="info-panel">
+        <div class="badge rings-badge">
+            🟡 <span id="ringsDisplay">0</span>
+        </div>
+        <div class="badge score-badge">
+            ⭐ <span id="scoreDisplay">0</span>
+        </div>
+        <div class="badge best-badge">
+            👑 <span id="bestDisplay">0</span>
+        </div>
+        <button class="restart-btn" id="restartBtn">🔄 Заново</button>
     </div>
+</div>
 
-    <script>
-        // ============================================================
-        //  ИГРОВАЯ ЛОГИКА
-        // ============================================================
+<script>
+    (function() {
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const bestDisplay = document.getElementById('bestDisplay');
+        const ringsDisplay = document.getElementById('ringsDisplay');
 
-        const boardEl = document.getElementById('board');
-        const statusEl = document.getElementById('status');
-        const resetBtn = document.getElementById('resetBtn');
+        const W = 800, H = 400;
+        canvas.width = W;
+        canvas.height = H;
 
-        let board = Array(9).fill(null);
-        let currentPlayer = 'X';
+        // ------ ПЕРСОНАЖ ------
+        const sonic = {
+            x: 100,
+            y: 0,
+            radius: 20,
+            vy: 0,
+            gravity: 0.7,
+            jumpPower: -11,
+            grounded: false,
+            doubleJump: false,
+            hasDoubleJump: true
+        };
+
+        // ------ ИГРОВЫЕ ОБЪЕКТЫ ------
+        let obstacles = [];
+        let rings = [];
+        const RING_RADIUS = 12;
+        let groundY = 345;
+        let jumpPending = false;
+        let lastObstacleX = W + 200;
+        let frameCount = 0;
         let gameOver = false;
-        let winCells = [];
+        let score = 0;
+        let ringsCollected = 0; // счётчик собранных колец
+        let bestScore = 0;
+        let boulderSpawnedForRings = 0; // сколько булыжников уже создано за кольца
 
-        // Выигрышные линии
-        const WIN_LINES = [
-            [0, 1, 2], [3, 4, 5], [6, 7, 8],
-            [0, 3, 6], [1, 4, 7], [2, 5, 8],
-            [0, 4, 8], [2, 4, 6]
-        ];
+        // Загружаем рекорд
+        try {
+            bestScore = parseInt(localStorage.getItem('sonicBestScore')) || 0;
+        } catch(e) {
+            bestScore = 0;
+        }
 
-        // ===== РЕНДЕР =====
-        function render() {
-            // Очищаем доску
-            boardEl.innerHTML = '';
+        // ------ НАСТРОЙКИ СЛОЖНОСТИ ------
+        function getSpeed() {
+            return 2.5 + Math.min(score * 0.2, 5);
+        }
 
-            // Создаём клетки
-            for (let i = 0; i < 9; i++) {
-                const cell = document.createElement('div');
-                cell.className = 'cell';
-                cell.dataset.index = i;
+        function getSpawnInterval() {
+            return Math.max(200, 400 - score * 3);
+        }
 
-                const val = board[i];
-                if (val) {
-                    cell.textContent = val;
-                    cell.classList.add(val === 'X' ? 'x' : 'o');
-                }
+        function getRingChance() {
+            return Math.max(0.003, 0.008 - score * 0.0002);
+        }
 
-                // Победная подсветка
-                if (winCells.includes(i)) {
-                    cell.classList.add('win');
-                }
+        // ------ СБРОС ИГРЫ ------
+        function resetGame() {
+            sonic.y = groundY - sonic.radius;
+            sonic.vy = 0;
+            sonic.grounded = true;
+            sonic.doubleJump = false;
+            sonic.hasDoubleJump = true;
+            obstacles = [];
+            rings = [];
+            jumpPending = false;
+            lastObstacleX = W + 200;
+            frameCount = 0;
+            gameOver = false;
+            score = 0;
+            ringsCollected = 0;
+            boulderSpawnedForRings = 0;
+            updateDisplays();
+        }
 
-                cell.addEventListener('click', () => makeMove(i));
-                cell.addEventListener('touchend', (e) => {
-                    e.preventDefault();
-                    makeMove(i);
-                });
+        function updateDisplays() {
+            scoreDisplay.textContent = score;
+            bestDisplay.textContent = bestScore;
+            ringsDisplay.textContent = ringsCollected;
+        }
 
-                boardEl.appendChild(cell);
+        // ------ СОЗДАНИЕ БУЛЫЖНИКА (вызывается при сборе 5 колец) ------
+        function spawnBoulderForRings() {
+            const types = ['boulder_medium', 'boulder_large', 'boulder_giant', 'boulder_rolling', 'boulder_stack'];
+            const type = types[Math.floor(Math.random() * types.length)];
+            
+            let obstacle = {
+                x: W + 40,
+                type: type,
+                width: 0,
+                height: 0,
+                y: 0,
+                passed: false,
+                bouncePhase: Math.random() * Math.PI * 2,
+                rotation: 0,
+                color1: '#5A5A5A',
+                color2: '#707070',
+                shape: 'circle',
+                fromRings: true // помечаем, что этот булыжник создан за кольца
+            };
+
+            switch(type) {
+                case 'boulder_medium':
+                    obstacle.width = 45;
+                    obstacle.height = 42;
+                    break;
+                case 'boulder_large':
+                    obstacle.width = 60;
+                    obstacle.height = 55;
+                    obstacle.color1 = '#4A4A4A';
+                    break;
+                case 'boulder_giant':
+                    obstacle.width = 75;
+                    obstacle.height = 70;
+                    obstacle.color1 = '#3A3A3A';
+                    obstacle.color2 = '#505050';
+                    break;
+                case 'boulder_rolling':
+                    obstacle.width = 40;
+                    obstacle.height = 38;
+                    obstacle.color1 = '#5C4033';
+                    obstacle.color2 = '#8B7355';
+                    obstacle.shape = 'rolling';
+                    break;
+                case 'boulder_stack':
+                    obstacle.width = 65;
+                    obstacle.height = 40;
+                    obstacle.color1 = '#6B6B6B';
+                    obstacle.color2 = '#7D7D7D';
+                    obstacle.shape = 'stack';
+                    break;
+            }
+            
+            obstacle.y = groundY - obstacle.height;
+            obstacles.push(obstacle);
+            lastObstacleX = obstacle.x;
+        }
+
+        // ------ СОЗДАНИЕ ОБЫЧНЫХ ПРЕПЯТСТВИЙ ------
+        function spawnObstacle() {
+            if (lastObstacleX > W - getSpawnInterval()) return;
+
+            let types = ['boulder_small', 'boulder_medium', 'boulder_large', 'boulder_stack'];
+            if (score >= 3) types.push('boulder_rolling', 'rock_pile');
+            if (score >= 8) types.push('boulder_giant', 'rock_wall');
+            if (score >= 15) types.push('spike_small', 'double_boulder');
+            if (score >= 25) types.push('boulder_falling', 'spike_row');
+            if (score >= 35) types.push('boulder_bouncing', 'rock_avalanche');
+
+            const type = types[Math.floor(Math.random() * types.length)];
+            
+            let obstacle = {
+                x: W + 40,
+                type: type,
+                width: 0,
+                height: 0,
+                y: 0,
+                passed: false,
+                bouncePhase: Math.random() * Math.PI * 2,
+                rotation: 0,
+                fromRings: false
+            };
+
+            switch(type) {
+                case 'boulder_small':
+                    obstacle.width = 30;
+                    obstacle.height = 28;
+                    obstacle.y = groundY - obstacle.height;
+                    obstacle.color1 = '#696969';
+                    obstacle.color2 = '#808080';
+                    obstacle.shape = 'circle';
+                    break;
+                    
+                case 'boulder_medium':
+                    obstacle.width = 45;
+                    obstacle.height = 42;
+                    obstacle.y = groundY - obstacle.height;
+                    obstacle.color1 = '#5A5A5A';
+                    obstacle.color2 = '#707070';
+                    obstacle.shape = 'circle';
+                    break;
+                    
+                case 'boulder_large':
+                    obstacle.width = 60;
+                    obstacle.height = 55;
+                    obstacle.y = groundY - obstacle.height;
+                    obstacle.color1 = '#4A4A4A';
+                    obstacle.color2 = '#606060';
+                    obstacle.shape = 'circle';
+                    break;
+                    
+                case 'boulder_stack':
+                    obstacle.width = 65;
+                    obstacle.height = 40;
+                    obstacle.y = groundY - obstacle.height;
+                    obstacle.color1 = '#6B6B6B';
+                    obstacle.color2 = '#7D7D7D';
+                    obstacle.shape = 'stack';
+                    break;
+                    
+                case 'boulder_rolling':
+                    obstacle.width = 40;
+                    obstacle.height = 38;
+                    obstacle.y = groundY - obstacle.height;
+                    obstacle.color1 = '#5C4033';
+                    obstacle.color2 = '#8B7355';
+                    obstacle.shape = 'rolling';
+                    break;
+                    
+                case 'rock_pile':
+                    obstacle.width = 70;
+                    obstacle.height = 35;
+                    obstacle.y = groundY - obstacle.height;
+                    obstacle.color1 = '#696969';
+                    obstacle.color2 = '#808080';
+                    obstacle.shape = 'pile';
+                    break;
+                    
+                case 'boulder_giant':
+                    obstacle.width = 75;
+                    obstacle.height = 70;
+                    obstacle.y = groundY - obstacle.height;
+                    obstacle.color1 = '#3A3A3A';
+                    obstacle.color2 = '#505050';
+                    obstacle.shape = 'circle';
+                    break;
+                    
+                case 'rock_wall':
+                    obstacle.width = 50;
+                    obstacle.height = 65;
+                    obstacle.y = groundY - obstacle.height;
+                    obstacle.color1 = '#5A5A5A';
+                    obstacle.color2 = '#6E6E6E';
+                    obstacle.shape = 'wall';
+                    break;
+                    
+                case 'double_boulder':
+                    obstacle.width = 80;
+                    obstacle.height = 35;
+                    obstacle.y = groundY - obstacle.height;
+                    obstacle.color1 = '#696969';
+                    obstacle.color2 = '#808080';
+                    obstacle.shape = 'double';
+                    break;
+                    
+                case 'boulder_falling':
+                    obstacle.width = 45;
+                    obstacle.height = 42;
+                    obstacle.y = -60;
+                    obstacle.falling = true;
+                    obstacle.fallSpeed = 3;
+                    obstacle.color1 = '#5A5A5A';
+                    obstacle.color2 = '#707070';
+                    obstacle.shape = 'circle';
+                    break;
+                    
+                case 'boulder_bouncing':
+                    obstacle.width = 40;
+                    obstacle.height = 38;
+                    obstacle.y = groundY - 80;
+                    obstacle.baseY = groundY - 80;
+                    obstacle.color1 = '#4A4A4A';
+                    obstacle.color2 = '#606060';
+                    obstacle.shape = 'circle';
+                    break;
+                    
+                case 'rock_avalanche':
+                    obstacle.width = 90;
+                    obstacle.height = 30;
+                    obstacle.y = groundY - obstacle.height;
+                    obstacle.color1 = '#696969';
+                    obstacle.color2 = '#808080';
+                    obstacle.shape = 'pile';
+                    break;
+                    
+                case 'spike_small':
+                    obstacle.width = 25;
+                    obstacle.height = 20;
+                    obstacle.y = groundY - obstacle.height;
+                    obstacle.color1 = '#8B0000';
+                    obstacle.color2 = '#FF4444';
+                    obstacle.shape = 'spike';
+                    break;
+                    
+                case 'spike_row':
+                    obstacle.width = 80;
+                    obstacle.height = 20;
+                    obstacle.y = groundY - obstacle.height;
+                    obstacle.color1 = '#8B0000';
+                    obstacle.color2 = '#FF4444';
+                    obstacle.shape = 'spike_row';
+                    break;
             }
 
-            // Обновляем статус
-            if (gameOver) {
-                const winner = getWinner();
-                if (winner) {
-                    statusEl.innerHTML = `🏆 Победил <strong class="${winner === 'X' ? 'x-color' : 'o-color'}">${winner}</strong>!`;
-                } else {
-                    statusEl.innerHTML = '🤝 Ничья!';
-                }
+            obstacles.push(obstacle);
+            lastObstacleX = obstacle.x;
+        }
+
+        // ------ СОЗДАНИЕ КОЛЕЦ ------
+        function spawnRing() {
+            const y = groundY - 30 - Math.random() * 60;
+            rings.push({
+                x: W + 30,
+                y: y,
+                radius: RING_RADIUS,
+                collected: false,
+                glowPhase: Math.random() * Math.PI * 2
+            });
+        }
+
+        // ------ ПРОВЕРКА СТОЛКНОВЕНИЯ = СМЕРТЬ ------
+        function checkCollision(obstacle) {
+            const margin = 3;
+            const sLeft = sonic.x - sonic.radius + margin;
+            const sRight = sonic.x + sonic.radius - margin;
+            const sTop = sonic.y - sonic.radius + margin;
+            const sBottom = sonic.y + sonic.radius - margin;
+
+            let oLeft, oRight, oTop, oBottom;
+            
+            if (obstacle.shape === 'circle' || obstacle.shape === 'rolling') {
+                const cx = obstacle.x + obstacle.width/2;
+                const cy = obstacle.y + obstacle.height/2;
+                const radius = obstacle.width/2 - margin;
+                
+                const closestX = Math.max(sLeft, Math.min(cx, sRight));
+                const closestY = Math.max(sTop, Math.min(cy, sBottom));
+                
+                const dx = cx - closestX;
+                const dy = cy - closestY;
+                
+                return (dx*dx + dy*dy) < (radius*radius);
             } else {
-                statusEl.innerHTML = `Ход: <strong class="${currentPlayer === 'X' ? 'x-color' : 'o-color'}">${currentPlayer}</strong>`;
+                oLeft = obstacle.x + margin;
+                oRight = obstacle.x + obstacle.width - margin;
+                oTop = obstacle.y + margin;
+                oBottom = obstacle.y + obstacle.height - margin;
+                
+                return (
+                    sRight > oLeft &&
+                    sLeft < oRight &&
+                    sBottom > oTop &&
+                    sTop < oBottom
+                );
             }
         }
 
-        // ===== ХОД =====
-        function makeMove(index) {
-            if (board[index] || gameOver) return;
+        function die() {
+            if (gameOver) return;
+            gameOver = true;
+            
+            if (score > bestScore) {
+                bestScore = score;
+                try {
+                    localStorage.setItem('sonicBestScore', bestScore);
+                } catch(e) {}
+                updateDisplays();
+            }
+            
+            for (let i = 0; i < 10; i++) {
+                rings.push({
+                    x: sonic.x + (Math.random() - 0.5) * 60,
+                    y: sonic.y + (Math.random() - 0.5) * 60,
+                    radius: RING_RADIUS * 0.5,
+                    collected: false,
+                    glowPhase: 0,
+                    speedX: (Math.random() - 0.5) * 6,
+                    speedY: -Math.random() * 6 - 2
+                });
+            }
+        }
 
-            board[index] = currentPlayer;
-
-            const winner = getWinner();
-            if (winner) {
-                gameOver = true;
-                // Находим победную линию
-                for (const line of WIN_LINES) {
-                    const [a, b, c] = line;
-                    if (board[a] && board[a] === board[b] && board[a] === board[c]) {
-                        winCells = line;
-                        break;
+        // ------ ОБНОВЛЕНИЕ ИГРЫ ------
+        function update() {
+            if (gameOver) {
+                for (let i = rings.length - 1; i >= 0; i--) {
+                    const ring = rings[i];
+                    if (ring.speedX !== undefined) {
+                        ring.x += ring.speedX;
+                        ring.y += ring.speedY;
+                        ring.speedY += 0.3;
+                        if (ring.y > H + 50 || ring.x < -50 || ring.x > W + 50) {
+                            rings.splice(i, 1);
+                        }
                     }
                 }
-            } else if (board.every(cell => cell)) {
-                gameOver = true;
-            } else {
-                currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+                return;
             }
 
-            render();
-        }
+            frameCount++;
+            const speed = getSpeed();
 
-        // ===== ПРОВЕРКА ПОБЕДЫ =====
-        function getWinner() {
-            for (const line of WIN_LINES) {
-                const [a, b, c] = line;
-                if (board[a] && board[a] === board[b] && board[a] === board[c]) {
-                    return board[a];
+            // Гравитация
+            sonic.vy += sonic.gravity;
+            sonic.y += sonic.vy;
+
+            // Земля
+            if (sonic.y >= groundY - sonic.radius) {
+                sonic.y = groundY - sonic.radius;
+                sonic.vy = 0;
+                sonic.grounded = true;
+                sonic.hasDoubleJump = true;
+                sonic.doubleJump = false;
+            } else {
+                sonic.grounded = false;
+            }
+
+            // Прыжок
+            if (jumpPending && !gameOver) {
+                if (sonic.grounded) {
+                    sonic.vy = sonic.jumpPower;
+                    sonic.grounded = false;
+                    sonic.hasDoubleJump = true;
+                } else if (sonic.hasDoubleJump && !sonic.doubleJump) {
+                    sonic.vy = sonic.jumpPower * 0.8;
+                    sonic.doubleJump = true;
+                    sonic.hasDoubleJump = false;
+                }
+                jumpPending = false;
+            }
+
+            // Обновление препятствий
+            for (let i = obstacles.length - 1; i >= 0; i--) {
+                const obs = obstacles[i];
+                obs.x -= speed;
+
+                if (obs.type === 'boulder_rolling') {
+                    obs.rotation += speed * 0.05;
+                }
+                if (obs.type === 'boulder_bouncing') {
+                    obs.y = obs.baseY + Math.abs(Math.sin(frameCount * 0.05 + obs.bouncePhase)) * 60;
+                }
+                if (obs.type === 'boulder_falling') {
+                    if (obs.falling) {
+                        obs.y += obs.fallSpeed;
+                        obs.fallSpeed += 0.15;
+                    }
+                    if (obs.y > groundY - obs.height) {
+                        obs.y = groundY - obs.height;
+                        obs.falling = false;
+                    }
+                }
+
+                if (obs.x + obs.width < -100) {
+                    obstacles.splice(i, 1);
+                    continue;
+                }
+
+                if (!obs.passed && obs.x + obs.width < sonic.x - sonic.radius) {
+                    obs.passed = true;
+                    score++;
+                    updateDisplays();
+                    
+                    const distToGround = groundY - sonic.y;
+                    if (distToGround < obs.height + 15) {
+                        score += 2;
+                        updateDisplays();
+                    }
+                }
+
+                if (checkCollision(obs)) {
+                    die();
+                    break;
                 }
             }
-            return null;
-        }
 
-        // ===== СБРОС =====
-        function resetGame() {
-            board = Array(9).fill(null);
-            currentPlayer = 'X';
-            gameOver = false;
-            winCells = [];
-            render();
-        }
+            // Спавн обычных препятствий
+            if (obstacles.length === 0 || lastObstacleX < W - getSpawnInterval() + Math.random() * 80) {
+                spawnObstacle();
+            }
 
-        resetBtn.addEventListener('click', resetGame);
+            // Кольца
+            for (let i = rings.length - 1; i >= 0; i--) {
+                const ring = rings[i];
+                
+                if (ring.speedX !== undefined) {
+                    ring.x += ring.speedX;
+                    ring.y += ring.speedY;
+                    ring.speedY += 0.3;
+                    if (ring.y > H + 50) {
+                        rings.splice(i, 1);
+                    }
+                    continue;
+                }
+                
+                ring.x -= speed;
 
-        // ============================================================
-        //  ЗВЁЗДЫ НА ФОНЕ
-        // ============================================================
+                if (ring.x + ring.radius < -20) {
+                    rings.splice(i, 1);
+                    continue;
+                }
 
-        function createStars() {
-            const container = document.getElementById('stars');
-            const count = window.innerWidth < 500 ? 70 : 130;
+                if (!ring.collected) {
+                    const dx = ring.x - sonic.x;
+                    const dy = ring.y - sonic.y;
+                    const dist = Math.sqrt(dx*dx + dy*dy);
+                    if (dist < sonic.radius + ring.radius) {
+                        ring.collected = true;
+                        ringsCollected++;
+                        score += 5;
+                        updateDisplays();
+                        rings.splice(i, 1);
+                        
+                        // 🔑 КАЖДЫЕ 5 КОЛЕЦ = БУЛЫЖНИК!
+                        if (ringsCollected % 5 === 0 && ringsCollected > boulderSpawnedForRings) {
+                            boulderSpawnedForRings = ringsCollected;
+                            spawnBoulderForRings();
+                        }
+                    }
+                }
+            }
 
-            for (let i = 0; i < count; i++) {
-                const star = document.createElement('div');
-                star.className = 'star';
-                const size = Math.random() * 3.5 + 1.5;
-                star.style.setProperty('--size', size + 'px');
-                star.style.setProperty('--x', Math.random() * 100 + '%');
-                star.style.setProperty('--y', Math.random() * 100 + '%');
-                star.style.setProperty('--duration', (Math.random() * 3 + 2) + 's');
-                star.style.setProperty('--opacity', Math.random() * 0.5 + 0.3);
-                star.style.animationDelay = (Math.random() * 5) + 's';
-                container.appendChild(star);
+            // Спавн колец
+            if (Math.random() < getRingChance()) {
+                spawnRing();
+            }
+
+            // Падение
+            if (sonic.y > H + 50) {
+                die();
             }
         }
-        createStars();
 
-        // ===== СТАРТ =====
-        render();
+        // ------ ОТРИСОВКА ------
+        function draw() {
+            ctx.clearRect(0, 0, W, H);
 
-        // ===== ЗАПРЕТ ЗУМА ПРИ ДВОЙНОМ ТАПЕ =====
-        document.addEventListener('dblclick', (e) => e.preventDefault());
-    </script>
+            // Небо
+            const grad = ctx.createLinearGradient(0, 0, 0, H);
+            grad.addColorStop(0, '#87CEEB');
+            grad.addColorStop(0.75, '#b0daf0');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, W, H);
+
+            // Горы
+            ctx.fillStyle = '#8FBC8F';
+            ctx.beginPath();
+            ctx.moveTo(0, groundY);
+            for (let x = 0; x <= W; x += 50) {
+                const h = 60 + Math.sin(x * 0.005 + frameCount * 0.01) * 20;
+                ctx.lineTo(x, groundY - h);
+            }
+            ctx.lineTo(W, groundY);
+            ctx.closePath();
+            ctx.fill();
+
+            // Облака
+            ctx.fillStyle = 'rgba(255,255,255,0.35)';
+            for (let i = 0; i < 5; i++) {
+                const cx = (i * 200 + frameCount * 0.2) % (W + 150) - 50;
+                const cy = 40 + i * 30 % 90;
+                ctx.beginPath();
+                ctx.arc(cx, cy, 30, 0, Math.PI*2);
+                ctx.arc(cx+40, cy-20, 35, 0, Math.PI*2);
+                ctx.arc(cx+80, cy, 28, 0, Math.PI*2);
+                ctx.fill();
+            }
+
+            // Земля
+            ctx.fillStyle = '#4CAF50';
+            ctx.fillRect(0, groundY, W, H - groundY + 5);
+            ctx.fillStyle = '#6B8E23';
+            ctx.fillRect(0, groundY, W, 8);
+            
+            ctx.fillStyle = '#5D9B3A';
+            for (let x = (frameCount * 2) % 60 - 60; x < W; x += 60) {
+                ctx.fillRect(x, groundY + 10, 30, 8);
+            }
+
+            ctx.strokeStyle = '#2E7D32';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            for (let x = 0; x < W; x += 8) {
+                const yOff = Math.sin(x * 0.1 + frameCount * 0.003) * 2;
+                if (x === 0) ctx.moveTo(x, groundY + yOff);
+                else ctx.lineTo(x, groundY + yOff);
+            }
+            ctx.stroke();
+
+            // Кольца
+            for (const ring of rings) {
+                if (ring.speedX !== undefined) {
+                    ctx.fillStyle = '#FFD700';
+                    ctx.beginPath();
+                    ctx.arc(ring.x, ring.y, ring.radius, 0, Math.PI * 2);
+                    ctx.fill();
+                    continue;
+                }
+                
+                const glow = Math.sin(frameCount * 0.1 + (ring.glowPhase || 0)) * 0.3 + 0.7;
+                
+                ctx.save();
+                ctx.shadowColor = '#FFD700';
+                ctx.shadowBlur = 10 * glow;
+                
+                const gradRing = ctx.createRadialGradient(
+                    ring.x - 3, ring.y - 4, 2,
+                    ring.x, ring.y, ring.radius
+                );
+                gradRing.addColorStop(0, '#FFD700');
+                gradRing.addColorStop(0.7, '#FFA500');
+                gradRing.addColorStop(1, '#B8860B');
+
+                ctx.beginPath();
+                ctx.arc(ring.x, ring.y, ring.radius, 0, Math.PI * 2);
+                ctx.fillStyle = gradRing;
+                ctx.fill();
+                ctx.strokeStyle = '#DAA520';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.arc(ring.x, ring.y, ring.radius * 0.45, 0, Math.PI * 2);
+                ctx.fillStyle = '#87CEEB';
+                ctx.fill();
+                
+                ctx.restore();
+            }
+
+            // Препятствия
+            for (const obs of obstacles) {
+                drawObstacle(obs);
+            }
+
+            // Соник
+            if (!gameOver) {
+                drawSonic();
+            } else {
+                drawDeadSonic();
+            }
+
+            // Индикатор двойного прыжка
+            if (!sonic.grounded && sonic.hasDoubleJump && !sonic.doubleJump && !gameOver) {
+                ctx.fillStyle = 'rgba(255,255,255,0.7)';
+                ctx.font = 'bold 14px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('⬆️ ДВОЙНОЙ ПРЫЖОК', sonic.x, sonic.y - 45);
+            }
+
+            // Предупреждение о булыжнике
+            if (ringsCollected > 0 && ringsCollected % 5 === 4 && !gameOver) {
+                ctx.fillStyle = '#FF4444';
+                ctx.font = 'bold 16px Arial';
+                ctx.textAlign = 'center';
+                const alpha = 0.6 + Math.sin(frameCount * 0.2) * 0.4;
+                ctx.fillStyle = `rgba(255,68,68,${alpha})`;
+                ctx.fillText('⚠️ БУЛЫЖНИК! ⚠️', sonic.x, sonic.y - 60);
+            }
+
+            // Game Over
+            if (gameOver) {
+                ctx.fillStyle = 'rgba(0,0,0,0.7)';
+                ctx.fillRect(0, 0, W, H);
+
+                ctx.fillStyle = '#FFD700';
+                ctx.font = 'bold 52px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.shadowColor = 'black';
+                ctx.shadowBlur = 20;
+                ctx.fillText('💀 РАЗДАВЛЕН!', W/2, H/2 - 35);
+                ctx.shadowBlur = 0;
+
+                ctx.fillStyle = 'white';
+                ctx.font = '22px Arial';
+                ctx.fillText(`Колец: ${ringsCollected} | Счёт: ${score}`, W/2, H/2 + 10);
+                
+                if (score >= bestScore && score > 0) {
+                    ctx.fillStyle = '#FFD700';
+                    ctx.fillText('🏆 НОВЫЙ РЕКОРД! 🏆', W/2, H/2 + 40);
+                } else {
+                    ctx.fillText(`Рекорд: ${bestScore}`, W/2, H/2 + 40);
+                }
+                
+                ctx.fillStyle = 'white';
+                ctx.fillText('Нажми "Заново"', W/2, H/2 + 70);
+            }
+        }
+
+        function drawObstacle(obs) {
+            const {x, y, width, height, color1, color2, type, shape} = obs;
+            
+            ctx.save();
+            ctx.shadowColor = 'rgba(0,0,0,0.5)';
+            ctx.shadowBlur = 8;
+            ctx.shadowOffsetY = 4;
+
+            if (shape === 'circle') {
+                const cx = x + width/2;
+                const cy = y + height/2;
+                const rx = width/2;
+                const ry = height/2;
+                
+                const grad = ctx.createRadialGradient(cx - rx*0.2, cy - ry*0.3, rx*0.1, cx, cy, rx);
+                grad.addColorStop(0, color2);
+                grad.addColorStop(0.6, color1);
+                grad.addColorStop(1, '#3A3A3A');
+                
+                ctx.fillStyle = grad;
+                ctx.beginPath();
+                ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.fillStyle = 'rgba(255,255,255,0.15)';
+                ctx.beginPath();
+                ctx.ellipse(cx - rx*0.2, cy - ry*0.3, rx*0.4, ry*0.3, 0, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.strokeStyle = 'rgba(0,0,0,0.3)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(cx - rx*0.5, cy - ry*0.2);
+                ctx.lineTo(cx + rx*0.1, cy + ry*0.1);
+                ctx.lineTo(cx + rx*0.3, cy + ry*0.4);
+                ctx.stroke();
+            } else if (shape === 'rolling') {
+                const cx = x + width/2;
+                const cy = y + height/2;
+                const rx = width/2;
+                const ry = height/2;
+                
+                ctx.save();
+                ctx.translate(cx, cy);
+                ctx.rotate(obs.rotation || 0);
+                
+                const grad = ctx.createRadialGradient(-rx*0.2, -ry*0.3, rx*0.1, 0, 0, rx);
+                grad.addColorStop(0, color2);
+                grad.addColorStop(0.6, color1);
+                grad.addColorStop(1, '#2A1A0A');
+                
+                ctx.fillStyle = grad;
+                ctx.beginPath();
+                ctx.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(-rx*0.7, -ry*0.5);
+                ctx.lineTo(rx*0.7, ry*0.5);
+                ctx.stroke();
+                
+                ctx.restore();
+            } else if (shape === 'stack' || shape === 'pile') {
+                const rockCount = shape === 'pile' ? 5 : 4;
+                const positions = shape === 'pile' ? 
+                    [[0.1,0.5,20], [0.3,0.3,22], [0.5,0.55,18], [0.7,0.35,21], [0.85,0.5,16]] :
+                    [[0.15,0.5,22], [0.4,0.35,20], [0.65,0.5,18], [0.9,0.35,15]];
+                
+                for (const [px, py, r] of positions) {
+                    const cx = x + width * px;
+                    const cy = y + height * py;
+                    const grad = ctx.createRadialGradient(cx-2, cy-3, r*0.1, cx, cy, r);
+                    grad.addColorStop(0, color2);
+                    grad.addColorStop(0.7, color1);
+                    grad.addColorStop(1, '#333');
+                    ctx.fillStyle = grad;
+                    ctx.beginPath();
+                    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            } else if (shape === 'wall') {
+                ctx.fillStyle = color1;
+                ctx.fillRect(x, y, width, height);
+                
+                for (let row = 0; row < height/15; row++) {
+                    const rowY = y + row * 15;
+                    const offset = row % 2 === 0 ? 0 : 12;
+                    for (let col = 0; col < width/25 + 1; col++) {
+                        const bx = x + offset + col * 25;
+                        ctx.fillStyle = (row + col) % 2 === 0 ? color1 : color2;
+                        ctx.fillRect(bx, rowY, 24, 14);
+                        ctx.strokeStyle = '#444';
+                        ctx.lineWidth = 1;
+                        ctx.strokeRect(bx, rowY, 24, 14);
+                    }
+                }
+            } else if (shape === 'double') {
+                for (let i = 0; i < 2; i++) {
+                    const cx = x + 20 + i * 40;
+                    const cy = y + height/2;
+                    const r = 17 + i * 2;
+                    const grad = ctx.createRadialGradient(cx-3, cy-4, r*0.1, cx, cy, r);
+                    grad.addColorStop(0, color2);
+                    grad.addColorStop(0.7, color1);
+                    grad.addColorStop(1, '#333');
+                    ctx.fillStyle = grad;
+                    ctx.beginPath();
+                    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            } else if (shape === 'spike' || shape === 'spike_row') {
+                const count = shape === 'spike_row' ? 4 : 1;
+                const sw = width / count;
+                for (let i = 0; i < count; i++) {
+                    const sx = x + i * sw;
+                    ctx.fillStyle = color1;
+                    ctx.beginPath();
+                    ctx.moveTo(sx + 3, y + height);
+                    ctx.lineTo(sx + sw/2, y);
+                    ctx.lineTo(sx + sw - 3, y + height);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.strokeStyle = color2;
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                }
+            }
+            
+            ctx.restore();
+        }
+
+        function drawSonic() {
+            const s = sonic;
+            ctx.save();
+            
+            ctx.shadowColor = 'rgba(0,0,0,0.3)';
+            ctx.shadowBlur = 10;
+            ctx.shadowOffsetY = 3;
+
+            ctx.beginPath();
+            ctx.ellipse(s.x, s.y, s.radius * 1.2, s.radius * 1.1, 0, 0, Math.PI * 2);
+            ctx.fillStyle = '#1E90FF';
+            ctx.fill();
+            ctx.strokeStyle = '#0B5B9C';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.ellipse(s.x - 4, s.y + 4, s.radius * 0.7, s.radius * 0.8, 0, 0, Math.PI * 2);
+            ctx.fillStyle = '#F5DEB3';
+            ctx.fill();
+
+            ctx.fillStyle = '#0B5B9C';
+            for (let i = -2; i <= 2; i++) {
+                const angle = -1.2 + i * 0.45;
+                const spikeX = s.x + Math.cos(angle) * s.radius * 1.1;
+                const spikeY = s.y + Math.sin(angle) * s.radius * 1.0 - 6;
+                ctx.beginPath();
+                ctx.moveTo(spikeX - 6, spikeY - 2);
+                ctx.lineTo(spikeX + 6, spikeY - 2);
+                ctx.lineTo(spikeX, spikeY - 25 - Math.abs(i)*3);
+                ctx.closePath();
+                ctx.fill();
+            }
+
+            ctx.fillStyle = 'white';
+            ctx.beginPath();
+            ctx.ellipse(s.x + 6, s.y - 6, 8, 10, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.ellipse(s.x + 18, s.y - 6, 8, 10, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = '#1a1a2c';
+            ctx.beginPath();
+            ctx.arc(s.x + 10, s.y - 4, 4, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(s.x + 22, s.y - 4, 4, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = 'white';
+            ctx.beginPath();
+            ctx.arc(s.x + 8, s.y - 8, 2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(s.x + 20, s.y - 8, 2, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = '#222';
+            ctx.beginPath();
+            ctx.arc(s.x + 14, s.y, 3.5, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.strokeStyle = '#222';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(s.x + 14, s.y + 4, 6, 0.1, Math.PI - 0.1);
+            ctx.stroke();
+
+            ctx.fillStyle = '#FF4500';
+            ctx.beginPath();
+            ctx.ellipse(s.x - 6, s.y + 16, 10, 6, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.ellipse(s.x + 22, s.y + 16, 10, 6, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = 'white';
+            ctx.beginPath();
+            ctx.ellipse(s.x - 6, s.y + 14, 6, 4, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.ellipse(s.x + 22, s.y + 14, 6, 4, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.restore();
+        }
+
+        function drawDeadSonic() {
+            const s = sonic;
+            ctx.save();
+            ctx.globalAlpha = 0.5;
+            
+            ctx.fillStyle = '#1E90FF';
+            ctx.beginPath();
+            ctx.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.fillStyle = 'white';
+            ctx.beginPath();
+            ctx.arc(s.x + 6, s.y - 5, 7, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(s.x + 18, s.y - 5, 7, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(s.x + 3, s.y - 8);
+            ctx.lineTo(s.x + 9, s.y - 2);
+            ctx.moveTo(s.x + 9, s.y - 8);
+            ctx.lineTo(s.x + 3, s.y - 2);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(s.x + 15, s.y - 8);
+            ctx.lineTo(s.x + 21, s.y - 2);
+            ctx.moveTo(s.x + 21, s.y - 8);
+            ctx.lineTo(s.x + 15, s.y - 2);
+            ctx.stroke();
+            
+            ctx.restore();
+        }
+
+        // ------ ИГРОВОЙ ЦИКЛ ------
+        function gameLoop() {
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // ------ УПРАВЛЕНИЕ ------
+        function jump() {
+            if (gameOver) return;
+            jumpPending = true;
+        }
+
+        function handleJump(e) {
+            if (e) e.preventDefault();
+            jump();
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' || e.key === 'ArrowUp' || e.key === 'w') {
+                e.preventDefault();
+                handleJump(e);
+            }
+        });
+
+        canvas.addEventListener('click', (e) => {
+            e.preventDefault();
+            handleJump(e);
+        });
+
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            handleJump(e);
+        }, { passive: false });
+
+        canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+
+        document.getElementById('restartBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            resetGame();
+        });
+
+        document.getElementById('restartBtn').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            resetGame();
+        }, { passive: false });
+
+        // ------ СТАРТ ------
+        bestDisplay.textContent = bestScore;
+        resetGame();
+        gameLoop();
+    })();
+</script>
 </body>
 </html>
