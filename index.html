@@ -1,1122 +1,1282 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Соник - Беги и прыгай!</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>⭐ Соник 3D - Изометрический сбор колец</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             user-select: none;
-            -webkit-tap-highlight-color: transparent;
         }
-
         body {
-            background: #0a1a2b;
+            background: linear-gradient(145deg, #0a1a2e, #1a3a5a);
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            font-family: 'Segoe UI', Arial, sans-serif;
-            touch-action: none;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
             overflow: hidden;
         }
-
         .game-wrapper {
-            background: linear-gradient(180deg, #4a90d9, #1e3c5a);
-            border-radius: 24px;
-            padding: 20px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7);
-            max-width: 100%;
+            background: linear-gradient(145deg, #1f4a6a, #0f2a3a);
+            padding: 1.5rem 2rem 2rem;
+            border-radius: 3.5rem;
+            box-shadow: 0 20px 30px rgba(0, 0, 0, 0.7), inset 0 -4px 8px rgba(0, 0, 0, 0.4);
+            border: 2px solid #3a7a9a;
         }
-
         canvas {
             display: block;
-            width: 100%;
-            height: auto;
-            max-width: 800px;
-            background: #87CEEB;
-            border-radius: 16px;
-            box-shadow: inset 0 0 30px rgba(0,0,0,0.2);
+            margin: 0 auto;
+            background: radial-gradient(circle at 30% 20%, #4a8aaa, #1a4a6a);
+            border-radius: 2rem;
+            box-shadow: inset 0 0 0 3px #3a7a9a, 0 12px 25px rgba(0, 0, 0, 0.6);
             cursor: pointer;
-            touch-action: none;
-            aspect-ratio: 800 / 400;
+            width: 800px;
+            height: 500px;
         }
-
-        .info-panel {
+        .game-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-top: 16px;
-            color: white;
+            padding: 0.4rem 0.8rem 1rem 0.8rem;
+            color: #f6e9b2;
+            text-shadow: 2px 2px 0 #1a2a3a;
             font-weight: bold;
-            font-size: 1.1rem;
-            padding: 0 8px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            font-size: 1.6rem;
+            letter-spacing: 1px;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 0.5rem;
         }
-
-        .badge {
-            background: rgba(0,0,0,0.3);
-            padding: 8px 16px;
-            border-radius: 40px;
-            backdrop-filter: blur(4px);
+        .score-box {
+            background: #0a1a2a;
+            padding: 0.4rem 1.2rem;
+            border-radius: 3rem;
+            box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.7), 0 4px 0 #2a5a7a;
+            color: #f5e56b;
+            font-size: 1.6rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .score-box span { font-size: 1.4rem; }
+        .level-box {
+            background: #0a1a2a;
+            padding: 0.4rem 1.2rem;
+            border-radius: 3rem;
+            box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.7), 0 4px 0 #2a5a7a;
+            color: #7ac7f5;
+            font-size: 1.4rem;
+            font-weight: 700;
             display: flex;
             align-items: center;
             gap: 8px;
-            font-size: 1rem;
         }
-
-        .badge span {
-            font-size: 1.5rem;
-            font-weight: bold;
+        .lives-box {
+            background: #2a0a0a;
+            padding: 0.4rem 1.2rem;
+            border-radius: 3rem;
+            box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.7), 0 4px 0 #5a2a2a;
+            color: #ff6a6a;
+            font-size: 1.4rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 2px solid #aa3333;
         }
-
-        .score-badge span { color: #ffd966; }
-        .best-badge span { color: #ff6b6b; }
-        .rings-badge span { color: #ffd700; }
-
-        .restart-btn {
+        .rings-box {
+            background: #1a2a1a;
+            padding: 0.4rem 1.2rem;
+            border-radius: 3rem;
+            box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.7), 0 4px 0 #4a6a2a;
+            color: #ffd700;
+            font-size: 1.4rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 2px solid #ffd700;
+        }
+        button {
             background: #f5c542;
             border: none;
-            border-radius: 40px;
-            padding: 10px 24px;
-            font-weight: bold;
-            font-size: 1.1rem;
-            color: #1e3c5a;
-            box-shadow: 0 4px 0 #b37b2e;
-            transition: all 0.05s ease;
+            padding: 0.4rem 1.4rem;
+            border-radius: 3rem;
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: #1a2a3a;
+            box-shadow: 0 5px 0 #a57c1e, 0 6px 10px rgba(0, 0, 0, 0.3);
+            transition: 0.08s linear;
             cursor: pointer;
-            touch-action: manipulation;
-            border: 2px solid #ffdd77;
+            letter-spacing: 0.5px;
         }
-
-        .restart-btn:active {
-            transform: translateY(4px);
-            box-shadow: 0 0px 0 #b37b2e;
+        button:active { transform: translateY(5px); box-shadow: 0 1px 0 #a57c1e; }
+        button:hover { background: #fdd95c; }
+        .controls { display: flex; gap: 0.8rem; align-items: center; flex-wrap: wrap; }
+        .hint { font-size: 0.9rem; background: #0a1a2a; padding: 0.2rem 1rem; border-radius: 3rem; color: #b9dcec; box-shadow: inset 0 2px 6px rgba(0,0,0,0.5); }
+        .hint kbd {
+            background: #2a4a5a;
+            padding: 0.1rem 0.6rem;
+            border-radius: 0.4rem;
+            color: #f5e56b;
+            font-weight: 700;
+            border: 1px solid #4a7a8a;
         }
-
-        @media (max-width: 600px) {
-            .game-wrapper { padding: 12px; }
-            .info-panel { font-size: 0.9rem; justify-content: center; }
-            .restart-btn { padding: 8px 18px; font-size: 1rem; }
-            .badge { padding: 6px 12px; }
-            .badge span { font-size: 1.2rem; }
+        .hint3d {
+            background: #1a2a4a;
+            color: #7ac7f5;
+            padding: 0.2rem 0.8rem;
+            border-radius: 2rem;
+            font-size: 0.8rem;
+            border: 1px solid #4a7aaa;
+        }
+        @media (max-width: 850px) {
+            .game-wrapper { padding: 1rem; }
+            canvas { width: 100%; height: auto; aspect-ratio: 800/500; }
+            .game-header { justify-content: center; }
+            .hint { font-size: 0.7rem; }
+            .hint3d { font-size: 0.6rem; padding: 0.1rem 0.6rem; }
         }
     </style>
 </head>
 <body>
-
-<div class="game-wrapper">
-    <canvas id="gameCanvas" width="800" height="400"></canvas>
-    <div class="info-panel">
-        <div class="badge rings-badge">
-            🟡 <span id="ringsDisplay">0</span>
+    <div class="game-wrapper">
+        <div class="game-header">
+            <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
+                <div class="score-box"><span>⭐</span><span id="scoreDisplay">0</span></div>
+                <div class="level-box"><span>🏆</span><span id="levelDisplay">1</span></div>
+                <div class="lives-box"><span>❤️</span><span id="livesDisplay">3</span></div>
+                <div class="rings-box"><span>💍</span><span id="ringsDisplay">0</span></div>
+                <span class="hint3d">🎮 3D Изометрия</span>
+            </div>
+            <div class="controls">
+                <span class="hint"><kbd>←</kbd> <kbd>→</kbd> <kbd>SPACE</kbd></span>
+                <button id="resetButton">↻ Новая игра</button>
+            </div>
         </div>
-        <div class="badge score-badge">
-            ⭐ <span id="scoreDisplay">0</span>
-        </div>
-        <div class="badge best-badge">
-            👑 <span id="bestDisplay">0</span>
-        </div>
-        <button class="restart-btn" id="restartBtn">🔄 Заново</button>
+        <canvas id="gameCanvas" width="800" height="500"></canvas>
     </div>
-</div>
 
-<script>
-    (function() {
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        const scoreDisplay = document.getElementById('scoreDisplay');
-        const bestDisplay = document.getElementById('bestDisplay');
-        const ringsDisplay = document.getElementById('ringsDisplay');
+    <script>
+        (function() {
+            const canvas = document.getElementById('gameCanvas');
+            const ctx = canvas.getContext('2d');
+            const scoreSpan = document.getElementById('scoreDisplay');
+            const levelSpan = document.getElementById('levelDisplay');
+            const livesSpan = document.getElementById('livesDisplay');
+            const ringsSpan = document.getElementById('ringsDisplay');
 
-        const W = 800, H = 400;
-        canvas.width = W;
-        canvas.height = H;
+            const W = 800,
+                H = 500;
 
-        // ------ ПЕРСОНАЖ ------
-        const sonic = {
-            x: 100,
-            y: 0,
-            radius: 20,
-            vy: 0,
-            gravity: 0.7,
-            jumpPower: -11,
-            grounded: false,
-            doubleJump: false,
-            hasDoubleJump: true
-        };
+            // ===== 3D ИЗОМЕТРИЧЕСКАЯ ПРОЕКЦИЯ =====
+            const ISO_SCALE = 0.7;
+            const GROUND_Y = H * 0.72;
+            const WORLD_LIMIT = 280;
 
-        // ------ ИГРОВЫЕ ОБЪЕКТЫ ------
-        let obstacles = [];
-        let rings = [];
-        const RING_RADIUS = 12;
-        let groundY = 345;
-        let jumpPending = false;
-        let lastObstacleX = W + 200;
-        let frameCount = 0;
-        let gameOver = false;
-        let score = 0;
-        let ringsCollected = 0; // счётчик собранных колец
-        let bestScore = 0;
-        let boulderSpawnedForRings = 0; // сколько булыжников уже создано за кольца
-
-        // Загружаем рекорд
-        try {
-            bestScore = parseInt(localStorage.getItem('sonicBestScore')) || 0;
-        } catch(e) {
-            bestScore = 0;
-        }
-
-        // ------ НАСТРОЙКИ СЛОЖНОСТИ ------
-        function getSpeed() {
-            return 2.5 + Math.min(score * 0.2, 5);
-        }
-
-        function getSpawnInterval() {
-            return Math.max(200, 400 - score * 3);
-        }
-
-        function getRingChance() {
-            return Math.max(0.003, 0.008 - score * 0.0002);
-        }
-
-        // ------ СБРОС ИГРЫ ------
-        function resetGame() {
-            sonic.y = groundY - sonic.radius;
-            sonic.vy = 0;
-            sonic.grounded = true;
-            sonic.doubleJump = false;
-            sonic.hasDoubleJump = true;
-            obstacles = [];
-            rings = [];
-            jumpPending = false;
-            lastObstacleX = W + 200;
-            frameCount = 0;
-            gameOver = false;
-            score = 0;
-            ringsCollected = 0;
-            boulderSpawnedForRings = 0;
-            updateDisplays();
-        }
-
-        function updateDisplays() {
-            scoreDisplay.textContent = score;
-            bestDisplay.textContent = bestScore;
-            ringsDisplay.textContent = ringsCollected;
-        }
-
-        // ------ СОЗДАНИЕ БУЛЫЖНИКА (вызывается при сборе 5 колец) ------
-        function spawnBoulderForRings() {
-            const types = ['boulder_medium', 'boulder_large', 'boulder_giant', 'boulder_rolling', 'boulder_stack'];
-            const type = types[Math.floor(Math.random() * types.length)];
-            
-            let obstacle = {
-                x: W + 40,
-                type: type,
-                width: 0,
-                height: 0,
-                y: 0,
-                passed: false,
-                bouncePhase: Math.random() * Math.PI * 2,
-                rotation: 0,
-                color1: '#5A5A5A',
-                color2: '#707070',
-                shape: 'circle',
-                fromRings: true // помечаем, что этот булыжник создан за кольца
-            };
-
-            switch(type) {
-                case 'boulder_medium':
-                    obstacle.width = 45;
-                    obstacle.height = 42;
-                    break;
-                case 'boulder_large':
-                    obstacle.width = 60;
-                    obstacle.height = 55;
-                    obstacle.color1 = '#4A4A4A';
-                    break;
-                case 'boulder_giant':
-                    obstacle.width = 75;
-                    obstacle.height = 70;
-                    obstacle.color1 = '#3A3A3A';
-                    obstacle.color2 = '#505050';
-                    break;
-                case 'boulder_rolling':
-                    obstacle.width = 40;
-                    obstacle.height = 38;
-                    obstacle.color1 = '#5C4033';
-                    obstacle.color2 = '#8B7355';
-                    obstacle.shape = 'rolling';
-                    break;
-                case 'boulder_stack':
-                    obstacle.width = 65;
-                    obstacle.height = 40;
-                    obstacle.color1 = '#6B6B6B';
-                    obstacle.color2 = '#7D7D7D';
-                    obstacle.shape = 'stack';
-                    break;
-            }
-            
-            obstacle.y = groundY - obstacle.height;
-            obstacles.push(obstacle);
-            lastObstacleX = obstacle.x;
-        }
-
-        // ------ СОЗДАНИЕ ОБЫЧНЫХ ПРЕПЯТСТВИЙ ------
-        function spawnObstacle() {
-            if (lastObstacleX > W - getSpawnInterval()) return;
-
-            let types = ['boulder_small', 'boulder_medium', 'boulder_large', 'boulder_stack'];
-            if (score >= 3) types.push('boulder_rolling', 'rock_pile');
-            if (score >= 8) types.push('boulder_giant', 'rock_wall');
-            if (score >= 15) types.push('spike_small', 'double_boulder');
-            if (score >= 25) types.push('boulder_falling', 'spike_row');
-            if (score >= 35) types.push('boulder_bouncing', 'rock_avalanche');
-
-            const type = types[Math.floor(Math.random() * types.length)];
-            
-            let obstacle = {
-                x: W + 40,
-                type: type,
-                width: 0,
-                height: 0,
-                y: 0,
-                passed: false,
-                bouncePhase: Math.random() * Math.PI * 2,
-                rotation: 0,
-                fromRings: false
-            };
-
-            switch(type) {
-                case 'boulder_small':
-                    obstacle.width = 30;
-                    obstacle.height = 28;
-                    obstacle.y = groundY - obstacle.height;
-                    obstacle.color1 = '#696969';
-                    obstacle.color2 = '#808080';
-                    obstacle.shape = 'circle';
-                    break;
-                    
-                case 'boulder_medium':
-                    obstacle.width = 45;
-                    obstacle.height = 42;
-                    obstacle.y = groundY - obstacle.height;
-                    obstacle.color1 = '#5A5A5A';
-                    obstacle.color2 = '#707070';
-                    obstacle.shape = 'circle';
-                    break;
-                    
-                case 'boulder_large':
-                    obstacle.width = 60;
-                    obstacle.height = 55;
-                    obstacle.y = groundY - obstacle.height;
-                    obstacle.color1 = '#4A4A4A';
-                    obstacle.color2 = '#606060';
-                    obstacle.shape = 'circle';
-                    break;
-                    
-                case 'boulder_stack':
-                    obstacle.width = 65;
-                    obstacle.height = 40;
-                    obstacle.y = groundY - obstacle.height;
-                    obstacle.color1 = '#6B6B6B';
-                    obstacle.color2 = '#7D7D7D';
-                    obstacle.shape = 'stack';
-                    break;
-                    
-                case 'boulder_rolling':
-                    obstacle.width = 40;
-                    obstacle.height = 38;
-                    obstacle.y = groundY - obstacle.height;
-                    obstacle.color1 = '#5C4033';
-                    obstacle.color2 = '#8B7355';
-                    obstacle.shape = 'rolling';
-                    break;
-                    
-                case 'rock_pile':
-                    obstacle.width = 70;
-                    obstacle.height = 35;
-                    obstacle.y = groundY - obstacle.height;
-                    obstacle.color1 = '#696969';
-                    obstacle.color2 = '#808080';
-                    obstacle.shape = 'pile';
-                    break;
-                    
-                case 'boulder_giant':
-                    obstacle.width = 75;
-                    obstacle.height = 70;
-                    obstacle.y = groundY - obstacle.height;
-                    obstacle.color1 = '#3A3A3A';
-                    obstacle.color2 = '#505050';
-                    obstacle.shape = 'circle';
-                    break;
-                    
-                case 'rock_wall':
-                    obstacle.width = 50;
-                    obstacle.height = 65;
-                    obstacle.y = groundY - obstacle.height;
-                    obstacle.color1 = '#5A5A5A';
-                    obstacle.color2 = '#6E6E6E';
-                    obstacle.shape = 'wall';
-                    break;
-                    
-                case 'double_boulder':
-                    obstacle.width = 80;
-                    obstacle.height = 35;
-                    obstacle.y = groundY - obstacle.height;
-                    obstacle.color1 = '#696969';
-                    obstacle.color2 = '#808080';
-                    obstacle.shape = 'double';
-                    break;
-                    
-                case 'boulder_falling':
-                    obstacle.width = 45;
-                    obstacle.height = 42;
-                    obstacle.y = -60;
-                    obstacle.falling = true;
-                    obstacle.fallSpeed = 3;
-                    obstacle.color1 = '#5A5A5A';
-                    obstacle.color2 = '#707070';
-                    obstacle.shape = 'circle';
-                    break;
-                    
-                case 'boulder_bouncing':
-                    obstacle.width = 40;
-                    obstacle.height = 38;
-                    obstacle.y = groundY - 80;
-                    obstacle.baseY = groundY - 80;
-                    obstacle.color1 = '#4A4A4A';
-                    obstacle.color2 = '#606060';
-                    obstacle.shape = 'circle';
-                    break;
-                    
-                case 'rock_avalanche':
-                    obstacle.width = 90;
-                    obstacle.height = 30;
-                    obstacle.y = groundY - obstacle.height;
-                    obstacle.color1 = '#696969';
-                    obstacle.color2 = '#808080';
-                    obstacle.shape = 'pile';
-                    break;
-                    
-                case 'spike_small':
-                    obstacle.width = 25;
-                    obstacle.height = 20;
-                    obstacle.y = groundY - obstacle.height;
-                    obstacle.color1 = '#8B0000';
-                    obstacle.color2 = '#FF4444';
-                    obstacle.shape = 'spike';
-                    break;
-                    
-                case 'spike_row':
-                    obstacle.width = 80;
-                    obstacle.height = 20;
-                    obstacle.y = groundY - obstacle.height;
-                    obstacle.color1 = '#8B0000';
-                    obstacle.color2 = '#FF4444';
-                    obstacle.shape = 'spike_row';
-                    break;
+            function isoToScreen(x, y, z) {
+                const sx = (x - y) * ISO_SCALE + W / 2;
+                const sy = (x + y) * ISO_SCALE * 0.5 - z * ISO_SCALE + GROUND_Y;
+                return { x: sx, y: sy };
             }
 
-            obstacles.push(obstacle);
-            lastObstacleX = obstacle.x;
-        }
-
-        // ------ СОЗДАНИЕ КОЛЕЦ ------
-        function spawnRing() {
-            const y = groundY - 30 - Math.random() * 60;
-            rings.push({
-                x: W + 30,
-                y: y,
-                radius: RING_RADIUS,
-                collected: false,
-                glowPhase: Math.random() * Math.PI * 2
-            });
-        }
-
-        // ------ ПРОВЕРКА СТОЛКНОВЕНИЯ = СМЕРТЬ ------
-        function checkCollision(obstacle) {
-            const margin = 3;
-            const sLeft = sonic.x - sonic.radius + margin;
-            const sRight = sonic.x + sonic.radius - margin;
-            const sTop = sonic.y - sonic.radius + margin;
-            const sBottom = sonic.y + sonic.radius - margin;
-
-            let oLeft, oRight, oTop, oBottom;
-            
-            if (obstacle.shape === 'circle' || obstacle.shape === 'rolling') {
-                const cx = obstacle.x + obstacle.width/2;
-                const cy = obstacle.y + obstacle.height/2;
-                const radius = obstacle.width/2 - margin;
-                
-                const closestX = Math.max(sLeft, Math.min(cx, sRight));
-                const closestY = Math.max(sTop, Math.min(cy, sBottom));
-                
-                const dx = cx - closestX;
-                const dy = cy - closestY;
-                
-                return (dx*dx + dy*dy) < (radius*radius);
-            } else {
-                oLeft = obstacle.x + margin;
-                oRight = obstacle.x + obstacle.width - margin;
-                oTop = obstacle.y + margin;
-                oBottom = obstacle.y + obstacle.height - margin;
-                
-                return (
-                    sRight > oLeft &&
-                    sLeft < oRight &&
-                    sBottom > oTop &&
-                    sTop < oBottom
-                );
+            function screenToIso(sx, sy) {
+                const dx = (sx - W / 2) / ISO_SCALE;
+                const dy = (sy - GROUND_Y) / ISO_SCALE;
+                return { x: (dx + dy * 2) / 2, y: (dy * 2 - dx) / 2 };
             }
-        }
 
-        function die() {
-            if (gameOver) return;
-            gameOver = true;
-            
-            if (score > bestScore) {
-                bestScore = score;
-                try {
-                    localStorage.setItem('sonicBestScore', bestScore);
-                } catch(e) {}
-                updateDisplays();
-            }
-            
-            for (let i = 0; i < 10; i++) {
-                rings.push({
-                    x: sonic.x + (Math.random() - 0.5) * 60,
-                    y: sonic.y + (Math.random() - 0.5) * 60,
-                    radius: RING_RADIUS * 0.5,
-                    collected: false,
-                    glowPhase: 0,
-                    speedX: (Math.random() - 0.5) * 6,
-                    speedY: -Math.random() * 6 - 2
-                });
-            }
-        }
+            // ===== ГЕНЕРАЦИЯ 3D УРОВНЯ =====
+            function generateLevel3D(level) {
+                const platforms = [];
+                const rings = [];
+                const enemies = [];
 
-        // ------ ОБНОВЛЕНИЕ ИГРЫ ------
-        function update() {
-            if (gameOver) {
-                for (let i = rings.length - 1; i >= 0; i--) {
-                    const ring = rings[i];
-                    if (ring.speedX !== undefined) {
-                        ring.x += ring.speedX;
-                        ring.y += ring.speedY;
-                        ring.speedY += 0.3;
-                        if (ring.y > H + 50 || ring.x < -50 || ring.x > W + 50) {
-                            rings.splice(i, 1);
-                        }
+                // Пол
+                platforms.push({ x: -250, y: -250, z: 0, w: 500, h: 0, d: 500 });
+
+                // Платформы-столбы
+                const platCount = 8 + Math.floor(level * 0.8);
+                for (let i = 0; i < platCount; i++) {
+                    const x = (Math.random() - 0.5) * 450;
+                    const y = (Math.random() - 0.5) * 450;
+                    const z = 20 + Math.random() * 60;
+                    const w = 40 + Math.random() * 50;
+                    const d = 40 + Math.random() * 50;
+                    if (Math.abs(x) < 100 && Math.abs(y) < 100) continue;
+                    platforms.push({ x, y, z, w, h: 15, d });
+                }
+
+                // Высокие платформы
+                const highCount = 2 + Math.floor(level * 0.3);
+                for (let i = 0; i < highCount; i++) {
+                    const x = (Math.random() - 0.5) * 400;
+                    const y = (Math.random() - 0.5) * 400;
+                    const z = 80 + Math.random() * 60;
+                    const w = 30 + Math.random() * 40;
+                    const d = 30 + Math.random() * 40;
+                    if (Math.abs(x) < 80 && Math.abs(y) < 80) continue;
+                    platforms.push({ x, y, z, w, h: 15, d });
+                }
+
+                // Кольца в 3D пространстве
+                const ringCount = 10 + level * 3;
+                for (let i = 0; i < ringCount; i++) {
+                    const x = (Math.random() - 0.5) * 450;
+                    const y = (Math.random() - 0.5) * 450;
+                    const z = 30 + Math.random() * 120;
+                    rings.push({
+                        x,
+                        y,
+                        z,
+                        r: 12,
+                        collected: false,
+                        bobOffset: Math.random() * Math.PI * 2,
+                        rot: Math.random() * Math.PI * 2
+                    });
+                }
+
+                // Враги в 3D
+                const enemyCount = 1 + Math.floor(level * 0.3);
+                for (let i = 0; i < enemyCount; i++) {
+                    const x = (Math.random() - 0.5) * 400;
+                    const y = (Math.random() - 0.5) * 400;
+                    const z = 20;
+                    let valid = true;
+                    for (const p of platforms) {
+                        if (Math.abs(x - p.x) < 30 && Math.abs(y - p.y) < 30 && Math.abs(z - p.z) < 20) valid = false;
+                    }
+                    if (valid && Math.abs(x) > 50 && Math.abs(y) > 50) {
+                        enemies.push({
+                            x,
+                            y,
+                            z,
+                            w: 28,
+                            h: 28,
+                            d: 28,
+                            vx: (Math.random() > 0.5 ? 0.4 : -0.4) * (0.3 + level * 0.02),
+                            vy: (Math.random() > 0.5 ? 0.4 : -0.4) * (0.3 + level * 0.02),
+                            alive: true,
+                            type: Math.random() < 0.3 ? 'robot' : 'spikebot',
+                            phase: Math.random() * Math.PI * 2,
+                            startX: x,
+                            startY: y,
+                            range: 30 + Math.random() * 40
+                        });
                     }
                 }
-                return;
+
+                return { platforms, rings, enemies };
             }
 
-            frameCount++;
-            const speed = getSpeed();
+            // ===== СОНИК В 3D =====
+            let sonic = {
+                x: 0,
+                y: 0,
+                z: 30,
+                w: 20,
+                h: 30,
+                d: 20,
+                vx: 0,
+                vy: 0,
+                vz: 0,
+                onGround: false,
+                facing: 1,
+                frame: 0,
+                spin: false
+            };
 
-            // Гравитация
-            sonic.vy += sonic.gravity;
-            sonic.y += sonic.vy;
+            let levelData = null;
+            let platforms = [];
+            let rings = [];
+            let enemies = [];
+            let particles = [];
+            let score = 0;
+            let lives = 3;
+            let ringCount = 0;
+            let level = 1;
+            let frameCounter = 0;
+            let gameActive = true;
+            let jumpEffect = 0;
+            let levelTransition = 0;
 
-            // Земля
-            if (sonic.y >= groundY - sonic.radius) {
-                sonic.y = groundY - sonic.radius;
+            // ===== ИНИЦИАЛИЗАЦИЯ =====
+            function initLevel() {
+                levelData = generateLevel3D(level);
+                platforms = levelData.platforms;
+                rings = levelData.rings;
+                enemies = levelData.enemies;
+
+                particles = [];
+                levelTransition = 0;
+                sonic.x = 0;
+                sonic.y = 0;
+                sonic.z = 30;
+                sonic.vx = 0;
                 sonic.vy = 0;
-                sonic.grounded = true;
-                sonic.hasDoubleJump = true;
-                sonic.doubleJump = false;
-            } else {
-                sonic.grounded = false;
+                sonic.vz = 0;
+                sonic.onGround = false;
+                updateUI();
             }
 
-            // Прыжок
-            if (jumpPending && !gameOver) {
-                if (sonic.grounded) {
-                    sonic.vy = sonic.jumpPower;
-                    sonic.grounded = false;
-                    sonic.hasDoubleJump = true;
-                } else if (sonic.hasDoubleJump && !sonic.doubleJump) {
-                    sonic.vy = sonic.jumpPower * 0.8;
-                    sonic.doubleJump = true;
-                    sonic.hasDoubleJump = false;
-                }
-                jumpPending = false;
+            function updateUI() {
+                scoreSpan.textContent = score;
+                levelSpan.textContent = level;
+                livesSpan.textContent = lives;
+                ringsSpan.textContent = ringCount;
             }
 
-            // Обновление препятствий
-            for (let i = obstacles.length - 1; i >= 0; i--) {
-                const obs = obstacles[i];
-                obs.x -= speed;
-
-                if (obs.type === 'boulder_rolling') {
-                    obs.rotation += speed * 0.05;
+            function respawnSonic() {
+                sonic.x = 0;
+                sonic.y = 0;
+                sonic.z = 30;
+                sonic.vx = 0;
+                sonic.vy = 0;
+                sonic.vz = 0;
+                sonic.onGround = false;
+                lives--;
+                if (lives <= 0) {
+                    gameActive = false;
+                } else {
+                    initLevel();
                 }
-                if (obs.type === 'boulder_bouncing') {
-                    obs.y = obs.baseY + Math.abs(Math.sin(frameCount * 0.05 + obs.bouncePhase)) * 60;
-                }
-                if (obs.type === 'boulder_falling') {
-                    if (obs.falling) {
-                        obs.y += obs.fallSpeed;
-                        obs.fallSpeed += 0.15;
-                    }
-                    if (obs.y > groundY - obs.height) {
-                        obs.y = groundY - obs.height;
-                        obs.falling = false;
-                    }
-                }
-
-                if (obs.x + obs.width < -100) {
-                    obstacles.splice(i, 1);
-                    continue;
-                }
-
-                if (!obs.passed && obs.x + obs.width < sonic.x - sonic.radius) {
-                    obs.passed = true;
-                    score++;
-                    updateDisplays();
-                    
-                    const distToGround = groundY - sonic.y;
-                    if (distToGround < obs.height + 15) {
-                        score += 2;
-                        updateDisplays();
-                    }
-                }
-
-                if (checkCollision(obs)) {
-                    die();
-                    break;
-                }
+                updateUI();
             }
 
-            // Спавн обычных препятствий
-            if (obstacles.length === 0 || lastObstacleX < W - getSpawnInterval() + Math.random() * 80) {
-                spawnObstacle();
-            }
+            // ===== ОБНОВЛЕНИЕ =====
+            function update() {
+                if (!gameActive) return;
+                frameCounter++;
 
-            // Кольца
-            for (let i = rings.length - 1; i >= 0; i--) {
-                const ring = rings[i];
-                
-                if (ring.speedX !== undefined) {
-                    ring.x += ring.speedX;
-                    ring.y += ring.speedY;
-                    ring.speedY += 0.3;
-                    if (ring.y > H + 50) {
-                        rings.splice(i, 1);
+                // Анимация
+                const speed = Math.sqrt(sonic.vx * sonic.vx + sonic.vy * sonic.vy);
+                if (speed > 0.3) {
+                    sonic.frame += 0.12;
+                    sonic.spin = speed > 1.2;
+                } else {
+                    sonic.frame = 0;
+                    sonic.spin = false;
+                }
+
+                // ===== ФИЗИКА В 3D =====
+                const GRAVITY_3D = 0.4;
+                sonic.vz += GRAVITY_3D;
+                sonic.x += sonic.vx;
+                sonic.y += sonic.vy;
+                sonic.z += sonic.vz;
+
+                if (sonic.onGround) {
+                    sonic.vx *= 0.88;
+                    sonic.vy *= 0.88;
+                } else {
+                    sonic.vx *= 0.96;
+                    sonic.vy *= 0.96;
+                }
+
+                sonic.onGround = false;
+
+                // Проверка столкновений с платформами
+                for (const p of platforms) {
+                    const halfW = sonic.w / 2;
+                    const halfD = sonic.d / 2;
+                    if (sonic.vz >= 0 &&
+                        sonic.x + halfW > p.x - 3 &&
+                        sonic.x - halfW < p.x + p.w + 3 &&
+                        sonic.y + halfD > p.y - 3 &&
+                        sonic.y - halfD < p.y + p.d + 3 &&
+                        sonic.z - sonic.h < p.z + p.h + 5 &&
+                        sonic.z > p.z - 3) {
+                        sonic.z = p.z + p.h;
+                        sonic.vz = 0;
+                        sonic.onGround = true;
                     }
-                    continue;
-                }
-                
-                ring.x -= speed;
-
-                if (ring.x + ring.radius < -20) {
-                    rings.splice(i, 1);
-                    continue;
                 }
 
-                if (!ring.collected) {
-                    const dx = ring.x - sonic.x;
-                    const dy = ring.y - sonic.y;
-                    const dist = Math.sqrt(dx*dx + dy*dy);
-                    if (dist < sonic.radius + ring.radius) {
+                // Падение в пропасть
+                if (sonic.z < -50) {
+                    respawnSonic();
+                    return;
+                }
+
+                // Границы мира
+                if (sonic.x < -WORLD_LIMIT) sonic.x = -WORLD_LIMIT;
+                if (sonic.x > WORLD_LIMIT) sonic.x = WORLD_LIMIT;
+                if (sonic.y < -WORLD_LIMIT) sonic.y = -WORLD_LIMIT;
+                if (sonic.y > WORLD_LIMIT) sonic.y = WORLD_LIMIT;
+
+                if (!sonic.onGround && sonic.vz < 0) jumpEffect = Math.min(jumpEffect + 0.05, 1);
+                else jumpEffect = Math.max(jumpEffect - 0.02, 0);
+
+                // ===== КОЛЬЦА =====
+                for (const ring of rings) {
+                    if (ring.collected) continue;
+                    const bob = Math.sin(frameCounter * 0.04 + ring.bobOffset) * 3;
+                    const dx = sonic.x - ring.x;
+                    const dy = sonic.y - ring.y;
+                    const dz = (sonic.z - sonic.h / 2) - (ring.z + bob);
+                    const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+                    if (dist < ring.r + 15) {
                         ring.collected = true;
-                        ringsCollected++;
-                        score += 5;
-                        updateDisplays();
-                        rings.splice(i, 1);
-                        
-                        // 🔑 КАЖДЫЕ 5 КОЛЕЦ = БУЛЫЖНИК!
-                        if (ringsCollected % 5 === 0 && ringsCollected > boulderSpawnedForRings) {
-                            boulderSpawnedForRings = ringsCollected;
-                            spawnBoulderForRings();
+                        ringCount++;
+                        score += 10;
+                        for (let i = 0; i < 10; i++) {
+                            particles.push({
+                                x: ring.x,
+                                y: ring.y,
+                                z: ring.z + bob,
+                                vx: (Math.random() - 0.5) * 4,
+                                vy: (Math.random() - 0.5) * 4,
+                                vz: (Math.random() - 0.5) * 4 + 2,
+                                life: 20,
+                                maxLife: 20,
+                                size: 2 + Math.random() * 3,
+                                color: '#ffd700'
+                            });
+                        }
+                        updateUI();
+                    }
+                }
+
+                // ===== ВРАГИ =====
+                for (const enemy of enemies) {
+                    if (!enemy.alive) continue;
+
+                    // Движение врага в 3D
+                    enemy.x += enemy.vx;
+                    enemy.y += enemy.vy;
+
+                    // Ограничение движения
+                    const dxFromStart = enemy.x - enemy.startX;
+                    const dyFromStart = enemy.y - enemy.startY;
+                    if (Math.abs(dxFromStart) > enemy.range) enemy.vx *= -1;
+                    if (Math.abs(dyFromStart) > enemy.range) enemy.vy *= -1;
+
+                    // Проверка столкновения с платформами
+                    let onPlat = false;
+                    for (const p of platforms) {
+                        if (enemy.x + enemy.w / 2 > p.x && enemy.x - enemy.w / 2 < p.x + p.w &&
+                            enemy.y + enemy.d / 2 > p.y && enemy.y - enemy.d / 2 < p.y + p.d &&
+                            enemy.z < p.z + p.h + 2 && enemy.z > p.z - 2) {
+                            enemy.z = p.z + p.h;
+                            onPlat = true;
+                            break;
+                        }
+                    }
+                    if (!onPlat) enemy.z -= 0.5;
+                    if (enemy.z < 2) enemy.z = 2;
+
+                    // Столкновение с Соником
+                    const dx = sonic.x - enemy.x;
+                    const dy = sonic.y - enemy.y;
+                    const dz = (sonic.z - sonic.h / 2) - (enemy.z - enemy.h / 2);
+                    if (Math.abs(dx) < (sonic.w / 2 + enemy.w / 2) &&
+                        Math.abs(dy) < (sonic.d / 2 + enemy.d / 2) &&
+                        Math.abs(dz) < (sonic.h / 2 + enemy.h / 2)) {
+                        if (sonic.vz > 0 && sonic.z < enemy.z + enemy.h / 2 + 5) {
+                            enemy.alive = false;
+                            sonic.vz = -8;
+                            score += 25;
+                            for (let i = 0; i < 15; i++) {
+                                particles.push({
+                                    x: enemy.x,
+                                    y: enemy.y,
+                                    z: enemy.z,
+                                    vx: (Math.random() - 0.5) * 6,
+                                    vy: (Math.random() - 0.5) * 6,
+                                    vz: (Math.random() - 0.5) * 6 + 2,
+                                    life: 15,
+                                    maxLife: 15,
+                                    size: 2 + Math.random() * 4,
+                                    color: '#ff4444'
+                                });
+                            }
+                            updateUI();
+                        } else {
+                            respawnSonic();
+                            return;
                         }
                     }
                 }
-            }
 
-            // Спавн колец
-            if (Math.random() < getRingChance()) {
-                spawnRing();
-            }
-
-            // Падение
-            if (sonic.y > H + 50) {
-                die();
-            }
-        }
-
-        // ------ ОТРИСОВКА ------
-        function draw() {
-            ctx.clearRect(0, 0, W, H);
-
-            // Небо
-            const grad = ctx.createLinearGradient(0, 0, 0, H);
-            grad.addColorStop(0, '#87CEEB');
-            grad.addColorStop(0.75, '#b0daf0');
-            ctx.fillStyle = grad;
-            ctx.fillRect(0, 0, W, H);
-
-            // Горы
-            ctx.fillStyle = '#8FBC8F';
-            ctx.beginPath();
-            ctx.moveTo(0, groundY);
-            for (let x = 0; x <= W; x += 50) {
-                const h = 60 + Math.sin(x * 0.005 + frameCount * 0.01) * 20;
-                ctx.lineTo(x, groundY - h);
-            }
-            ctx.lineTo(W, groundY);
-            ctx.closePath();
-            ctx.fill();
-
-            // Облака
-            ctx.fillStyle = 'rgba(255,255,255,0.35)';
-            for (let i = 0; i < 5; i++) {
-                const cx = (i * 200 + frameCount * 0.2) % (W + 150) - 50;
-                const cy = 40 + i * 30 % 90;
-                ctx.beginPath();
-                ctx.arc(cx, cy, 30, 0, Math.PI*2);
-                ctx.arc(cx+40, cy-20, 35, 0, Math.PI*2);
-                ctx.arc(cx+80, cy, 28, 0, Math.PI*2);
-                ctx.fill();
-            }
-
-            // Земля
-            ctx.fillStyle = '#4CAF50';
-            ctx.fillRect(0, groundY, W, H - groundY + 5);
-            ctx.fillStyle = '#6B8E23';
-            ctx.fillRect(0, groundY, W, 8);
-            
-            ctx.fillStyle = '#5D9B3A';
-            for (let x = (frameCount * 2) % 60 - 60; x < W; x += 60) {
-                ctx.fillRect(x, groundY + 10, 30, 8);
-            }
-
-            ctx.strokeStyle = '#2E7D32';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            for (let x = 0; x < W; x += 8) {
-                const yOff = Math.sin(x * 0.1 + frameCount * 0.003) * 2;
-                if (x === 0) ctx.moveTo(x, groundY + yOff);
-                else ctx.lineTo(x, groundY + yOff);
-            }
-            ctx.stroke();
-
-            // Кольца
-            for (const ring of rings) {
-                if (ring.speedX !== undefined) {
-                    ctx.fillStyle = '#FFD700';
-                    ctx.beginPath();
-                    ctx.arc(ring.x, ring.y, ring.radius, 0, Math.PI * 2);
-                    ctx.fill();
-                    continue;
+                // Партиклы
+                for (let i = particles.length - 1; i >= 0; i--) {
+                    const p = particles[i];
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.z += p.vz;
+                    p.vz -= 0.1;
+                    p.life--;
+                    if (p.life <= 0) particles.splice(i, 1);
                 }
-                
-                const glow = Math.sin(frameCount * 0.1 + (ring.glowPhase || 0)) * 0.3 + 0.7;
-                
-                ctx.save();
-                ctx.shadowColor = '#FFD700';
-                ctx.shadowBlur = 10 * glow;
-                
-                const gradRing = ctx.createRadialGradient(
-                    ring.x - 3, ring.y - 4, 2,
-                    ring.x, ring.y, ring.radius
-                );
-                gradRing.addColorStop(0, '#FFD700');
-                gradRing.addColorStop(0.7, '#FFA500');
-                gradRing.addColorStop(1, '#B8860B');
 
+                // Проверка уровня
+                const remainingRings = rings.filter(r => !r.collected).length;
+                const remainingEnemies = enemies.filter(e => e.alive).length;
+                if (remainingRings === 0 && remainingEnemies === 0 && levelTransition === 0) {
+                    levelTransition = 1;
+                    for (let i = 0; i < 50; i++) {
+                        setTimeout(() => {
+                            particles.push({
+                                x: (Math.random() - 0.5) * 300,
+                                y: (Math.random() - 0.5) * 300,
+                                z: 50 + Math.random() * 100,
+                                vx: (Math.random() - 0.5) * 10,
+                                vy: (Math.random() - 0.5) * 10,
+                                vz: (Math.random() - 0.5) * 10 + 4,
+                                life: 35,
+                                maxLife: 35,
+                                size: 3 + Math.random() * 6,
+                                color: ['#ffd700', '#ff4444', '#44ff44', '#4444ff', '#ff44ff', '#44ffff'][Math.floor(Math
+                                    .random() * 6)]
+                            });
+                        }, i * 40);
+                    }
+                    setTimeout(() => {
+                        level++;
+                        levelSpan.textContent = level;
+                        initLevel();
+                        levelTransition = 0;
+                    }, 2500);
+                }
+
+                updateUI();
+            }
+
+            // ===== РИСОВАНИЕ 3D ОБЪЕКТОВ =====
+            function draw3DPlatform(p) {
+                const pos = isoToScreen(p.x, p.y, p.z);
+                const pos2 = isoToScreen(p.x + p.w, p.y, p.z);
+                const pos3 = isoToScreen(p.x + p.w, p.y + p.d, p.z);
+                const pos4 = isoToScreen(p.x, p.y + p.d, p.z);
+                const topPos = isoToScreen(p.x, p.y, p.z + p.h);
+
+                if (p.z < 1) return; // Пол не рисуем
+
+                // Тень
+                ctx.shadowBlur = 0;
+                ctx.fillStyle = 'rgba(0,0,0,0.08)';
                 ctx.beginPath();
-                ctx.arc(ring.x, ring.y, ring.radius, 0, Math.PI * 2);
-                ctx.fillStyle = gradRing;
+                ctx.moveTo(pos.x, pos.y + 5);
+                ctx.lineTo(pos2.x, pos2.y + 5);
+                ctx.lineTo(pos3.x, pos3.y + 5);
+                ctx.lineTo(pos4.x, pos4.y + 5);
+                ctx.closePath();
                 ctx.fill();
-                ctx.strokeStyle = '#DAA520';
-                ctx.lineWidth = 2;
+
+                // Боковые стороны
+                ctx.shadowColor = 'rgba(0,0,0,0.15)';
+                ctx.shadowBlur = 8;
+                ctx.shadowOffsetY = 3;
+
+                const gradSide = ctx.createLinearGradient(pos.x, pos.y, pos.x, pos.y + 10);
+                gradSide.addColorStop(0, '#6a5a3a');
+                gradSide.addColorStop(1, '#4a3a2a');
+                ctx.fillStyle = gradSide;
+
+                // Левая боковая
+                ctx.beginPath();
+                ctx.moveTo(pos.x, pos.y);
+                ctx.lineTo(topPos.x, topPos.y);
+                ctx.lineTo(pos4.x, pos4.y);
+                ctx.lineTo(pos.x, pos.y);
+                ctx.fill();
+
+                // Правая боковая
+                ctx.beginPath();
+                ctx.moveTo(pos2.x, pos2.y);
+                ctx.lineTo(pos3.x, pos3.y);
+                ctx.lineTo(topPos.x, topPos.y);
+                ctx.lineTo(pos2.x, pos2.y);
+                ctx.fill();
+
+                // Верхняя поверхность
+                ctx.shadowBlur = 6;
+                const gradTop = ctx.createLinearGradient(pos.x, pos.y, pos.x + 20, pos.y + 20);
+                gradTop.addColorStop(0, '#8a7a5a');
+                gradTop.addColorStop(0.5, '#7a6a4a');
+                gradTop.addColorStop(1, '#6a5a3a');
+                ctx.fillStyle = gradTop;
+                ctx.beginPath();
+                ctx.moveTo(pos.x, pos.y);
+                ctx.lineTo(pos2.x, pos2.y);
+                ctx.lineTo(pos3.x, pos3.y);
+                ctx.lineTo(pos4.x, pos4.y);
+                ctx.closePath();
+                ctx.fill();
+
+                // Трава на платформе
+                if (p.z > 10) {
+                    ctx.shadowBlur = 0;
+                    ctx.fillStyle = '#3a8a4a';
+                    const step = 6;
+                    for (let i = 0; i < p.w; i += step) {
+                        for (let j = 0; j < p.d; j += step) {
+                            const grassPos = isoToScreen(p.x + i, p.y + j, p.z + p.h);
+                            if (grassPos.y < H - 10) {
+                                ctx.fillRect(grassPos.x - 1, grassPos.y - 2, 3, 4);
+                            }
+                        }
+                    }
+                }
+
+                ctx.shadowBlur = 0;
+            }
+
+            function draw3DRing(ring) {
+                const bob = Math.sin(frameCounter * 0.04 + ring.bobOffset) * 3;
+                const pos = isoToScreen(ring.x, ring.y, ring.z + bob);
+
+                // Тень
+                const shadowPos = isoToScreen(ring.x, ring.y, 0);
+                ctx.shadowBlur = 0;
+                ctx.fillStyle = 'rgba(0,0,0,0.15)';
+                ctx.beginPath();
+                ctx.ellipse(shadowPos.x, shadowPos.y + 4, ring.r * 0.8, ring.r * 0.4, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Кольцо
+                ctx.shadowColor = '#ffd700';
+                ctx.shadowBlur = 30;
+
+                const grad = ctx.createRadialGradient(pos.x - 3, pos.y - 3, 2, pos.x, pos.y, ring.r);
+                grad.addColorStop(0, '#ffd700');
+                grad.addColorStop(0.4, '#ffaa00');
+                grad.addColorStop(0.8, '#f5c542');
+                grad.addColorStop(1, '#cc8800');
+                ctx.beginPath();
+                ctx.ellipse(pos.x, pos.y, ring.r, ring.r * 0.7, ring.rot * 0.3, 0, Math.PI * 2);
+                ctx.fillStyle = grad;
+                ctx.fill();
+
+                // Внутреннее отверстие
+                ctx.shadowBlur = 3;
+                ctx.beginPath();
+                ctx.ellipse(pos.x, pos.y + 1, ring.r * 0.4, ring.r * 0.3, 0, 0, Math.PI * 2);
+                ctx.fillStyle = '#2a5a7a';
+                ctx.fill();
+
+                // Блик
+                ctx.shadowBlur = 0;
+                ctx.fillStyle = 'rgba(255,255,240,0.3)';
+                ctx.beginPath();
+                ctx.ellipse(pos.x - ring.r * 0.25, pos.y - ring.r * 0.3, ring.r * 0.2, ring.r * 0.12, -0.3, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.shadowBlur = 0;
+            }
+
+            function draw3DEnemy(enemy) {
+                if (!enemy.alive) return;
+                const pos = isoToScreen(enemy.x, enemy.y, enemy.z);
+
+                // Тень
+                const shadowPos = isoToScreen(enemy.x, enemy.y, 0);
+                ctx.shadowBlur = 0;
+                ctx.fillStyle = 'rgba(0,0,0,0.2)';
+                ctx.beginPath();
+                ctx.ellipse(shadowPos.x, shadowPos.y + 4, 14, 6, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.shadowColor = 'rgba(0,0,0,0.25)';
+                ctx.shadowBlur = 12;
+                ctx.shadowOffsetY = 3;
+
+                if (enemy.type === 'robot') {
+                    const grad = ctx.createRadialGradient(pos.x - 4, pos.y - 4, 3, pos.x, pos.y, 14);
+                    grad.addColorStop(0, '#6a8a9a');
+                    grad.addColorStop(0.5, '#4a6a7a');
+                    grad.addColorStop(1, '#1a2a3a');
+                    ctx.beginPath();
+                    ctx.ellipse(pos.x, pos.y, 14, 14, 0, 0, Math.PI * 2);
+                    ctx.fillStyle = grad;
+                    ctx.fill();
+
+                    ctx.shadowBlur = 0;
+                    ctx.fillStyle = '#ff2222';
+                    ctx.beginPath();
+                    ctx.arc(pos.x - 5, pos.y - 2, 4, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.arc(pos.x + 5, pos.y - 2, 4, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.fillStyle = '#aa0000';
+                    const eyeDir = enemy.vx > 0 ? 2 : -2;
+                    ctx.beginPath();
+                    ctx.arc(pos.x - 4 + eyeDir, pos.y - 1, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.arc(pos.x + 6 + eyeDir, pos.y - 1, 2, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.shadowBlur = 5;
+                    ctx.strokeStyle = '#6a8a9a';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.moveTo(pos.x, pos.y - 14);
+                    ctx.lineTo(pos.x, pos.y - 20);
+                    ctx.stroke();
+                    ctx.fillStyle = '#ff3333';
+                    ctx.beginPath();
+                    ctx.arc(pos.x, pos.y - 20, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                } else {
+                    const grad = ctx.createRadialGradient(pos.x - 4, pos.y - 4, 3, pos.x, pos.y, 14);
+                    grad.addColorStop(0, '#cc4444');
+                    grad.addColorStop(0.5, '#aa2222');
+                    grad.addColorStop(1, '#881111');
+                    ctx.beginPath();
+                    ctx.ellipse(pos.x, pos.y, 14, 14, 0, 0, Math.PI * 2);
+                    ctx.fillStyle = grad;
+                    ctx.fill();
+
+                    ctx.shadowBlur = 0;
+                    ctx.fillStyle = '#ff6666';
+                    for (let i = 0; i < 4; i++) {
+                        const angle = i * 1.57 + frameCounter * 0.02;
+                        const sx = pos.x + Math.cos(angle) * 12;
+                        const sy = pos.y + Math.sin(angle) * 12;
+                        ctx.beginPath();
+                        ctx.moveTo(sx - 3, sy);
+                        ctx.lineTo(sx, sy - 6);
+                        ctx.lineTo(sx + 3, sy);
+                        ctx.fill();
+                    }
+
+                    ctx.fillStyle = 'white';
+                    ctx.beginPath();
+                    ctx.arc(pos.x - 4, pos.y - 2, 3.5, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.arc(pos.x + 4, pos.y - 2, 3.5, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.fillStyle = '#1a1a2a';
+                    const eyeDir2 = enemy.vx > 0 ? 2 : -2;
+                    ctx.beginPath();
+                    ctx.arc(pos.x - 3 + eyeDir2, pos.y - 1, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.arc(pos.x + 5 + eyeDir2, pos.y - 1, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                ctx.shadowBlur = 0;
+            }
+
+            function draw3DSonic() {
+                const pos = isoToScreen(sonic.x, sonic.y, sonic.z - sonic.h / 2);
+                const cx = pos.x,
+                    cy = pos.y;
+                const isSpinning = sonic.spin;
+
+                // Тень
+                const shadowPos = isoToScreen(sonic.x, sonic.y, 0);
+                ctx.shadowBlur = 0;
+                const shadowScale = Math.max(0.4, 1 - (sonic.z / 80) * 0.6);
+                ctx.fillStyle = `rgba(0,0,0,${0.15 + (1 - Math.min(sonic.z / 50, 1)) * 0.15})`;
+                ctx.beginPath();
+                ctx.ellipse(shadowPos.x, shadowPos.y + 4, 16 * shadowScale, 7 * shadowScale, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.shadowColor = 'rgba(0,0,0,0.2)';
+                ctx.shadowBlur = 12;
+                ctx.shadowOffsetY = 3;
+
+                if (isSpinning) {
+                    ctx.save();
+                    ctx.translate(cx, cy);
+                    ctx.rotate(sonic.frame * 4);
+
+                    const grad = ctx.createRadialGradient(-4, -4, 3, 0, 0, 15);
+                    grad.addColorStop(0, '#5a9aff');
+                    grad.addColorStop(0.5, '#2a6aef');
+                    grad.addColorStop(1, '#0a2a8a');
+                    ctx.beginPath();
+                    ctx.arc(0, 0, 14, 0, Math.PI * 2);
+                    ctx.fillStyle = grad;
+                    ctx.fill();
+
+                    ctx.fillStyle = '#1a4adf';
+                    for (let i = 0; i < 5; i++) {
+                        const angle = -1.2 + i * 0.6;
+                        const sx = Math.cos(angle) * 12;
+                        const sy = Math.sin(angle) * 12;
+                        ctx.beginPath();
+                        ctx.moveTo(sx - 3, sy);
+                        ctx.lineTo(sx + Math.cos(angle + 0.2) * 8, sy + Math.sin(angle + 0.2) * 8);
+                        ctx.lineTo(sx + 3, sy);
+                        ctx.fill();
+                    }
+
+                    ctx.restore();
+                    ctx.shadowBlur = 0;
+                    return;
+                }
+
+                // Тело
+                const bodyGrad = ctx.createRadialGradient(cx - 4, cy - 4, 3, cx, cy, 14);
+                bodyGrad.addColorStop(0, '#5a9aff');
+                bodyGrad.addColorStop(0.5, '#2a6aef');
+                bodyGrad.addColorStop(1, '#0a2a8a');
+                ctx.beginPath();
+                ctx.ellipse(cx, cy + 2, 14, 17, 0, 0, Math.PI * 2);
+                ctx.fillStyle = bodyGrad;
+                ctx.fill();
+
+                // Живот
+                ctx.shadowBlur = 4;
+                ctx.beginPath();
+                ctx.ellipse(cx, cy + 6, 9, 11, 0.1, 0, Math.PI * 2);
+                ctx.fillStyle = '#f5e8d0';
+                ctx.fill();
+
+                // Голова
+                ctx.shadowBlur = 10;
+                const headGrad = ctx.createRadialGradient(cx - 3, cy - 8, 3, cx, cy - 5, 12);
+                headGrad.addColorStop(0, '#4a8aff');
+                headGrad.addColorStop(0.5, '#2a6aef');
+                headGrad.addColorStop(1, '#1a4adf');
+                ctx.beginPath();
+                ctx.ellipse(cx, cy - 5, 12, 13, 0, 0, Math.PI * 2);
+                ctx.fillStyle = headGrad;
+                ctx.fill();
+
+                // Иглы
+                ctx.shadowBlur = 6;
+                ctx.shadowColor = 'rgba(0,0,0,0.15)';
+                for (let i = 0; i < 5; i++) {
+                    const angle = -1.0 + i * 0.5;
+                    const spikeLen = 13 + Math.sin(i * 1.3 + sonic.frame * 1.5) * 2;
+                    const sx = cx + Math.cos(angle + 0.25) * 13 - 1.5 * (i / 5);
+                    const sy = cy - 4 + Math.sin(angle + 0.25) * 6;
+
+                    ctx.beginPath();
+                    ctx.moveTo(sx - 2.5, sy + 1);
+                    const tipX = sx + Math.sin(sonic.frame * 1.5 + i * 0.6) * 3;
+                    const tipY = sy - spikeLen - Math.sin(sonic.frame * 1.5 + i * 0.4) * 1.5;
+                    ctx.quadraticCurveTo(sx + 1.5, sy - spikeLen * 0.5, tipX, tipY);
+                    ctx.quadraticCurveTo(sx - 1.5, sy - spikeLen * 0.5, sx + 2.5, sy + 1);
+                    ctx.fillStyle = ['#1a4adf', '#2a5aef', '#1a4adf', '#3a6aef', '#1a4adf'][i];
+                    ctx.fill();
+                }
+
+                // Глаза
+                ctx.shadowBlur = 0;
+                ctx.fillStyle = 'white';
+                ctx.beginPath();
+                ctx.ellipse(cx - 5, cy - 7, 5, 6, -0.1, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.ellipse(cx + 5, cy - 7, 5, 6, 0.1, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = '#2a5a1a';
+                ctx.beginPath();
+                ctx.arc(cx - 3.5, cy - 6, 3, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(cx + 6.5, cy - 6, 3, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = '#0a0a1a';
+                const pupilOff = Math.sin(sonic.frame * 0.4) * 1.5;
+                ctx.beginPath();
+                ctx.arc(cx - 2.5 + pupilOff, cy - 5, 1.8, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(cx + 7.5 + pupilOff, cy - 5, 1.8, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = 'rgba(255,255,255,0.7)';
+                ctx.beginPath();
+                ctx.arc(cx - 6 + pupilOff, cy - 9, 1.2, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(cx + 4 + pupilOff, cy - 9, 1.2, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Улыбка
+                ctx.strokeStyle = '#1a1a2a';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.arc(cx, cy - 2, 6, 0.15, Math.PI - 0.15);
                 ctx.stroke();
 
+                // Руки
+                ctx.shadowBlur = 6;
+                ctx.shadowColor = 'rgba(0,0,0,0.15)';
+                const armSwing = Math.sin(sonic.frame * 2) * 1.5;
+                ctx.fillStyle = '#2a6aef';
                 ctx.beginPath();
-                ctx.arc(ring.x, ring.y, ring.radius * 0.45, 0, Math.PI * 2);
-                ctx.fillStyle = '#87CEEB';
+                ctx.ellipse(cx - 11 + armSwing * 0.3, cy + 3 + Math.abs(Math.sin(sonic.frame * 2)) * 1.5, 2.5, 6, -0.3, 0,
+                    Math.PI * 2);
                 ctx.fill();
-                
-                ctx.restore();
-            }
+                ctx.fillStyle = '#cc2222';
+                ctx.beginPath();
+                ctx.ellipse(cx - 12 + armSwing * 0.3, cy + 7 + Math.abs(Math.sin(sonic.frame * 2)) * 1.5, 3.5, 2.5, -0.1, 0,
+                    Math.PI * 2);
+                ctx.fill();
 
-            // Препятствия
-            for (const obs of obstacles) {
-                drawObstacle(obs);
-            }
+                ctx.fillStyle = '#2a6aef';
+                ctx.beginPath();
+                ctx.ellipse(cx + 11 - armSwing * 0.3, cy + 3 + Math.abs(Math.sin(sonic.frame * 2)) * 1.5, 2.5, 6, 0.3, 0,
+                    Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#cc2222';
+                ctx.beginPath();
+                ctx.ellipse(cx + 12 - armSwing * 0.3, cy + 7 + Math.abs(Math.sin(sonic.frame * 2)) * 1.5, 3.5, 2.5, 0.1, 0,
+                    Math.PI * 2);
+                ctx.fill();
 
-            // Соник
-            if (!gameOver) {
-                drawSonic();
-            } else {
-                drawDeadSonic();
-            }
+                // Ноги
+                ctx.shadowBlur = 8;
+                ctx.shadowColor = 'rgba(0,0,0,0.18)';
+                const legOff = Math.sin(sonic.frame * 2) * 2;
+                ctx.fillStyle = '#1a3a8a';
+                ctx.beginPath();
+                ctx.ellipse(cx - 5 + legOff * 0.3, cy + 14 + Math.abs(Math.sin(sonic.frame * 2)) * 1.5, 3.5, 6, 0.2, 0,
+                    Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.ellipse(cx + 5 - legOff * 0.3, cy + 14 + Math.abs(Math.sin(sonic.frame * 2)) * 1.5, 3.5, 6, -0.2, 0,
+                    Math.PI * 2);
+                ctx.fill();
 
-            // Индикатор двойного прыжка
-            if (!sonic.grounded && sonic.hasDoubleJump && !sonic.doubleJump && !gameOver) {
-                ctx.fillStyle = 'rgba(255,255,255,0.7)';
-                ctx.font = 'bold 14px Arial';
-                ctx.textAlign = 'center';
-                ctx.fillText('⬆️ ДВОЙНОЙ ПРЫЖОК', sonic.x, sonic.y - 45);
-            }
+                // Кроссовки
+                ctx.shadowBlur = 6;
+                ctx.shadowColor = 'rgba(0,0,0,0.15)';
+                ctx.fillStyle = '#ff4444';
+                ctx.beginPath();
+                ctx.ellipse(cx - 6 + legOff * 0.3, cy + 18 + Math.abs(Math.sin(sonic.frame * 2)) * 1.5, 6, 3.5, 0, 0,
+                    Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.ellipse(cx + 6 - legOff * 0.3, cy + 18 + Math.abs(Math.sin(sonic.frame * 2)) * 1.5, 6, 3.5, 0, 0,
+                    Math.PI * 2);
+                ctx.fill();
 
-            // Предупреждение о булыжнике
-            if (ringsCollected > 0 && ringsCollected % 5 === 4 && !gameOver) {
-                ctx.fillStyle = '#FF4444';
-                ctx.font = 'bold 16px Arial';
-                ctx.textAlign = 'center';
-                const alpha = 0.6 + Math.sin(frameCount * 0.2) * 0.4;
-                ctx.fillStyle = `rgba(255,68,68,${alpha})`;
-                ctx.fillText('⚠️ БУЛЫЖНИК! ⚠️', sonic.x, sonic.y - 60);
-            }
+                ctx.shadowBlur = 0;
+                ctx.fillStyle = 'rgba(255,255,255,0.25)';
+                ctx.beginPath();
+                ctx.ellipse(cx - 6 + legOff * 0.3, cy + 17 + Math.abs(Math.sin(sonic.frame * 2)) * 1.5, 4, 1.5, 0.1, 0,
+                    Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.ellipse(cx + 6 - legOff * 0.3, cy + 17 + Math.abs(Math.sin(sonic.frame * 2)) * 1.5, 4, 1.5, -0.1, 0,
+                    Math.PI * 2);
+                ctx.fill();
 
-            // Game Over
-            if (gameOver) {
-                ctx.fillStyle = 'rgba(0,0,0,0.7)';
-                ctx.fillRect(0, 0, W, H);
-
-                ctx.fillStyle = '#FFD700';
-                ctx.font = 'bold 52px Arial';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.shadowColor = 'black';
-                ctx.shadowBlur = 20;
-                ctx.fillText('💀 РАЗДАВЛЕН!', W/2, H/2 - 35);
                 ctx.shadowBlur = 0;
 
-                ctx.fillStyle = 'white';
-                ctx.font = '22px Arial';
-                ctx.fillText(`Колец: ${ringsCollected} | Счёт: ${score}`, W/2, H/2 + 10);
-                
-                if (score >= bestScore && score > 0) {
-                    ctx.fillStyle = '#FFD700';
-                    ctx.fillText('🏆 НОВЫЙ РЕКОРД! 🏆', W/2, H/2 + 40);
-                } else {
-                    ctx.fillText(`Рекорд: ${bestScore}`, W/2, H/2 + 40);
-                }
-                
-                ctx.fillStyle = 'white';
-                ctx.fillText('Нажми "Заново"', W/2, H/2 + 70);
-            }
-        }
-
-        function drawObstacle(obs) {
-            const {x, y, width, height, color1, color2, type, shape} = obs;
-            
-            ctx.save();
-            ctx.shadowColor = 'rgba(0,0,0,0.5)';
-            ctx.shadowBlur = 8;
-            ctx.shadowOffsetY = 4;
-
-            if (shape === 'circle') {
-                const cx = x + width/2;
-                const cy = y + height/2;
-                const rx = width/2;
-                const ry = height/2;
-                
-                const grad = ctx.createRadialGradient(cx - rx*0.2, cy - ry*0.3, rx*0.1, cx, cy, rx);
-                grad.addColorStop(0, color2);
-                grad.addColorStop(0.6, color1);
-                grad.addColorStop(1, '#3A3A3A');
-                
-                ctx.fillStyle = grad;
-                ctx.beginPath();
-                ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
-                ctx.fill();
-                
-                ctx.fillStyle = 'rgba(255,255,255,0.15)';
-                ctx.beginPath();
-                ctx.ellipse(cx - rx*0.2, cy - ry*0.3, rx*0.4, ry*0.3, 0, 0, Math.PI * 2);
-                ctx.fill();
-                
-                ctx.strokeStyle = 'rgba(0,0,0,0.3)';
-                ctx.lineWidth = 1;
-                ctx.beginPath();
-                ctx.moveTo(cx - rx*0.5, cy - ry*0.2);
-                ctx.lineTo(cx + rx*0.1, cy + ry*0.1);
-                ctx.lineTo(cx + rx*0.3, cy + ry*0.4);
-                ctx.stroke();
-            } else if (shape === 'rolling') {
-                const cx = x + width/2;
-                const cy = y + height/2;
-                const rx = width/2;
-                const ry = height/2;
-                
-                ctx.save();
-                ctx.translate(cx, cy);
-                ctx.rotate(obs.rotation || 0);
-                
-                const grad = ctx.createRadialGradient(-rx*0.2, -ry*0.3, rx*0.1, 0, 0, rx);
-                grad.addColorStop(0, color2);
-                grad.addColorStop(0.6, color1);
-                grad.addColorStop(1, '#2A1A0A');
-                
-                ctx.fillStyle = grad;
-                ctx.beginPath();
-                ctx.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2);
-                ctx.fill();
-                
-                ctx.strokeStyle = 'rgba(255,255,255,0.2)';
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.moveTo(-rx*0.7, -ry*0.5);
-                ctx.lineTo(rx*0.7, ry*0.5);
-                ctx.stroke();
-                
-                ctx.restore();
-            } else if (shape === 'stack' || shape === 'pile') {
-                const rockCount = shape === 'pile' ? 5 : 4;
-                const positions = shape === 'pile' ? 
-                    [[0.1,0.5,20], [0.3,0.3,22], [0.5,0.55,18], [0.7,0.35,21], [0.85,0.5,16]] :
-                    [[0.15,0.5,22], [0.4,0.35,20], [0.65,0.5,18], [0.9,0.35,15]];
-                
-                for (const [px, py, r] of positions) {
-                    const cx = x + width * px;
-                    const cy = y + height * py;
-                    const grad = ctx.createRadialGradient(cx-2, cy-3, r*0.1, cx, cy, r);
-                    grad.addColorStop(0, color2);
-                    grad.addColorStop(0.7, color1);
-                    grad.addColorStop(1, '#333');
-                    ctx.fillStyle = grad;
-                    ctx.beginPath();
-                    ctx.arc(cx, cy, r, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-            } else if (shape === 'wall') {
-                ctx.fillStyle = color1;
-                ctx.fillRect(x, y, width, height);
-                
-                for (let row = 0; row < height/15; row++) {
-                    const rowY = y + row * 15;
-                    const offset = row % 2 === 0 ? 0 : 12;
-                    for (let col = 0; col < width/25 + 1; col++) {
-                        const bx = x + offset + col * 25;
-                        ctx.fillStyle = (row + col) % 2 === 0 ? color1 : color2;
-                        ctx.fillRect(bx, rowY, 24, 14);
-                        ctx.strokeStyle = '#444';
-                        ctx.lineWidth = 1;
-                        ctx.strokeRect(bx, rowY, 24, 14);
+                // Эффект прыжка
+                if (!sonic.onGround && jumpEffect > 0.2) {
+                    ctx.strokeStyle = `rgba(255,255,255,${jumpEffect * 0.1})`;
+                    ctx.lineWidth = 1.5;
+                    for (let i = 0; i < 3; i++) {
+                        const angle = frameCounter * 0.05 + i * 1.5;
+                        const rad = 22 + i * 6;
+                        ctx.beginPath();
+                        ctx.ellipse(
+                            cx + Math.cos(angle) * rad,
+                            cy + Math.sin(angle) * rad * 0.5,
+                            8 + i * 3, 4 + i * 1.5, angle * 0.3, 0, Math.PI * 2
+                        );
+                        ctx.stroke();
                     }
                 }
-            } else if (shape === 'double') {
-                for (let i = 0; i < 2; i++) {
-                    const cx = x + 20 + i * 40;
-                    const cy = y + height/2;
-                    const r = 17 + i * 2;
-                    const grad = ctx.createRadialGradient(cx-3, cy-4, r*0.1, cx, cy, r);
-                    grad.addColorStop(0, color2);
-                    grad.addColorStop(0.7, color1);
-                    grad.addColorStop(1, '#333');
-                    ctx.fillStyle = grad;
+            }
+
+            function draw3DParticles() {
+                for (const p of particles) {
+                    const pos = isoToScreen(p.x, p.y, p.z);
+                    ctx.globalAlpha = p.life / p.maxLife;
+                    ctx.shadowBlur = 0;
+                    ctx.fillStyle = p.color;
                     ctx.beginPath();
-                    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+                    ctx.arc(pos.x, pos.y, p.size * (p.life / p.maxLife), 0, Math.PI * 2);
                     ctx.fill();
                 }
-            } else if (shape === 'spike' || shape === 'spike_row') {
-                const count = shape === 'spike_row' ? 4 : 1;
-                const sw = width / count;
-                for (let i = 0; i < count; i++) {
-                    const sx = x + i * sw;
-                    ctx.fillStyle = color1;
+                ctx.globalAlpha = 1;
+            }
+
+            function draw3DGrid() {
+                ctx.strokeStyle = 'rgba(255,255,200,0.05)';
+                ctx.lineWidth = 1;
+                const step = 40;
+                for (let i = -250; i <= 250; i += step) {
+                    const p1 = isoToScreen(i, -250, 0);
+                    const p2 = isoToScreen(i, 250, 0);
                     ctx.beginPath();
-                    ctx.moveTo(sx + 3, y + height);
-                    ctx.lineTo(sx + sw/2, y);
-                    ctx.lineTo(sx + sw - 3, y + height);
-                    ctx.closePath();
-                    ctx.fill();
-                    ctx.strokeStyle = color2;
-                    ctx.lineWidth = 2;
+                    ctx.moveTo(p1.x, p1.y);
+                    ctx.lineTo(p2.x, p2.y);
+                    ctx.stroke();
+                    const p3 = isoToScreen(-250, i, 0);
+                    const p4 = isoToScreen(250, i, 0);
+                    ctx.beginPath();
+                    ctx.moveTo(p3.x, p3.y);
+                    ctx.lineTo(p4.x, p4.y);
                     ctx.stroke();
                 }
             }
-            
-            ctx.restore();
-        }
 
-        function drawSonic() {
-            const s = sonic;
-            ctx.save();
-            
-            ctx.shadowColor = 'rgba(0,0,0,0.3)';
-            ctx.shadowBlur = 10;
-            ctx.shadowOffsetY = 3;
+            function draw() {
+                ctx.clearRect(0, 0, W, H);
 
-            ctx.beginPath();
-            ctx.ellipse(s.x, s.y, s.radius * 1.2, s.radius * 1.1, 0, 0, Math.PI * 2);
-            ctx.fillStyle = '#1E90FF';
-            ctx.fill();
-            ctx.strokeStyle = '#0B5B9C';
-            ctx.lineWidth = 2;
-            ctx.stroke();
+                // Небо
+                const skyGrad = ctx.createRadialGradient(W * 0.3, H * 0.2, 100, W * 0.5, H * 0.5, 500);
+                skyGrad.addColorStop(0, '#4a8aaa');
+                skyGrad.addColorStop(0.5, '#2a6a8a');
+                skyGrad.addColorStop(1, '#1a4a6a');
+                ctx.fillStyle = skyGrad;
+                ctx.fillRect(0, 0, W, H);
 
-            ctx.beginPath();
-            ctx.ellipse(s.x - 4, s.y + 4, s.radius * 0.7, s.radius * 0.8, 0, 0, Math.PI * 2);
-            ctx.fillStyle = '#F5DEB3';
-            ctx.fill();
+                // 3D сетка
+                draw3DGrid();
 
-            ctx.fillStyle = '#0B5B9C';
-            for (let i = -2; i <= 2; i++) {
-                const angle = -1.2 + i * 0.45;
-                const spikeX = s.x + Math.cos(angle) * s.radius * 1.1;
-                const spikeY = s.y + Math.sin(angle) * s.radius * 1.0 - 6;
+                // Платформы (сортировка по глубине)
+                const sortedPlatforms = [...platforms].sort((a, b) => (a.x + a.y) - (b.x + b.y));
+                for (const p of sortedPlatforms) {
+                    draw3DPlatform(p);
+                }
+
+                // Кольца
+                for (const ring of rings) {
+                    if (!ring.collected) draw3DRing(ring);
+                }
+
+                // Враги
+                for (const enemy of enemies) {
+                    draw3DEnemy(enemy);
+                }
+
+                // Соник
+                draw3DSonic();
+
+                // Партиклы
+                draw3DParticles();
+
+                // ===== ИНФО =====
+                ctx.shadowBlur = 0;
+                ctx.fillStyle = 'rgba(0,0,0,0.4)';
                 ctx.beginPath();
-                ctx.moveTo(spikeX - 6, spikeY - 2);
-                ctx.lineTo(spikeX + 6, spikeY - 2);
-                ctx.lineTo(spikeX, spikeY - 25 - Math.abs(i)*3);
-                ctx.closePath();
+                ctx.roundRect(10, 10, 320, 30, 12);
                 ctx.fill();
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 13px Arial';
+                ctx.textAlign = 'left';
+                ctx.textBaseline = 'middle';
+                const remaining = rings.filter(r => !r.collected).length;
+                const total = rings.length;
+                const mobsLeft = enemies.filter(e => e.alive).length;
+                ctx.fillText(`💍 ${total - remaining}/${total}  ❤️ ${lives}  ⭐ ${score}  👾 ${mobsLeft}`, 18, 26);
+
+                ctx.fillStyle = 'rgba(0,0,0,0.4)';
+                ctx.beginPath();
+                ctx.roundRect(W - 140, 10, 130, 30, 12);
+                ctx.fill();
+                ctx.fillStyle = '#ffd700';
+                ctx.font = 'bold 16px Arial';
+                ctx.textAlign = 'right';
+                ctx.fillText(`🏆 Ур. ${level}`, W - 18, 26);
+
+                // 3D индикатор
+                ctx.fillStyle = 'rgba(0,0,0,0.3)';
+                ctx.beginPath();
+                ctx.roundRect(W / 2 - 60, 10, 120, 18, 9);
+                ctx.fill();
+                ctx.fillStyle = '#7ac7f5';
+                ctx.font = '9px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                const zPos = Math.round((sonic.z / 120) * 100);
+                ctx.fillText(`📐 Высота: ${Math.max(0, zPos)}%`, W / 2, 20);
+
+                if (levelTransition > 0) {
+                    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+                    ctx.fillRect(0, 0, W, H);
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.shadowColor = '#ffd700';
+                    ctx.shadowBlur = 40;
+                    ctx.font = 'bold 48px Arial';
+                    ctx.fillStyle = '#ffd700';
+                    ctx.fillText('🎉 УРОВЕНЬ ПРОЙДЕН! 🎉', 400, 200);
+                    ctx.font = '28px Arial';
+                    ctx.fillStyle = '#fff';
+                    ctx.fillText(`Уровень ${level + 1}`, 400, 270);
+                    ctx.shadowBlur = 0;
+                }
+
+                if (!gameActive) {
+                    ctx.shadowBlur = 0;
+                    ctx.fillStyle = 'rgba(0,0,0,0.6)';
+                    ctx.fillRect(0, 0, W, H);
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.shadowColor = '#1f2a30';
+                    ctx.shadowBlur = 30;
+                    ctx.font = 'bold 52px Arial';
+                    ctx.fillStyle = '#ff4444';
+                    ctx.fillText('💀 ИГРА ОКОНЧЕНА', 400, 180);
+                    ctx.font = '28px Arial';
+                    ctx.fillStyle = '#fee9b0';
+                    ctx.fillText(`Достигнут уровень: ${level}`, 400, 240);
+                    ctx.fillText(`Собрано колец: ${ringCount}`, 400, 290);
+                    ctx.font = '20px Arial';
+                    ctx.fillStyle = '#b9dcec';
+                    ctx.fillText('Нажмите "Новая игра"', 400, 350);
+                    ctx.shadowBlur = 0;
+                }
+
+                ctx.shadowBlur = 10;
+                ctx.font = 'bold 14px "Segoe UI", sans-serif';
+                ctx.fillStyle = '#fae37c';
+                ctx.fillText(`⚡ Соник 3D • Ур. ${level}`, 20, H - 15);
+                ctx.shadowBlur = 0;
             }
 
-            ctx.fillStyle = 'white';
-            ctx.beginPath();
-            ctx.ellipse(s.x + 6, s.y - 6, 8, 10, 0, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.ellipse(s.x + 18, s.y - 6, 8, 10, 0, 0, Math.PI * 2);
-            ctx.fill();
+            // ===== ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ =====
+            CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
+                if (r > w / 2) r = w / 2;
+                if (r > h / 2) r = h / 2;
+                this.moveTo(x + r, y);
+                this.lineTo(x + w - r, y);
+                this.quadraticCurveTo(x + w, y, x + w, y + r);
+                this.lineTo(x + w, y + h - r);
+                this.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+                this.lineTo(x + r, y + h);
+                this.quadraticCurveTo(x, y + h, x, y + h - r);
+                this.lineTo(x, y + r);
+                this.quadraticCurveTo(x, y, x + r, y);
+                this.closePath();
+                return this;
+            };
 
-            ctx.fillStyle = '#1a1a2c';
-            ctx.beginPath();
-            ctx.arc(s.x + 10, s.y - 4, 4, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.arc(s.x + 22, s.y - 4, 4, 0, Math.PI * 2);
-            ctx.fill();
+            // ===== УПРАВЛЕНИЕ =====
+            const keys = {};
+            let jumpPressed = false;
+            const STEP_3D = 0.035;
 
-            ctx.fillStyle = 'white';
-            ctx.beginPath();
-            ctx.arc(s.x + 8, s.y - 8, 2, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.arc(s.x + 20, s.y - 8, 2, 0, Math.PI * 2);
-            ctx.fill();
-
-            ctx.fillStyle = '#222';
-            ctx.beginPath();
-            ctx.arc(s.x + 14, s.y, 3.5, 0, Math.PI * 2);
-            ctx.fill();
-
-            ctx.strokeStyle = '#222';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.arc(s.x + 14, s.y + 4, 6, 0.1, Math.PI - 0.1);
-            ctx.stroke();
-
-            ctx.fillStyle = '#FF4500';
-            ctx.beginPath();
-            ctx.ellipse(s.x - 6, s.y + 16, 10, 6, 0, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.ellipse(s.x + 22, s.y + 16, 10, 6, 0, 0, Math.PI * 2);
-            ctx.fill();
-
-            ctx.fillStyle = 'white';
-            ctx.beginPath();
-            ctx.ellipse(s.x - 6, s.y + 14, 6, 4, 0, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.ellipse(s.x + 22, s.y + 14, 6, 4, 0, 0, Math.PI * 2);
-            ctx.fill();
-
-            ctx.restore();
-        }
-
-        function drawDeadSonic() {
-            const s = sonic;
-            ctx.save();
-            ctx.globalAlpha = 0.5;
-            
-            ctx.fillStyle = '#1E90FF';
-            ctx.beginPath();
-            ctx.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
-            ctx.fill();
-            
-            ctx.fillStyle = 'white';
-            ctx.beginPath();
-            ctx.arc(s.x + 6, s.y - 5, 7, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.arc(s.x + 18, s.y - 5, 7, 0, Math.PI * 2);
-            ctx.fill();
-            
-            ctx.strokeStyle = 'black';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(s.x + 3, s.y - 8);
-            ctx.lineTo(s.x + 9, s.y - 2);
-            ctx.moveTo(s.x + 9, s.y - 8);
-            ctx.lineTo(s.x + 3, s.y - 2);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(s.x + 15, s.y - 8);
-            ctx.lineTo(s.x + 21, s.y - 2);
-            ctx.moveTo(s.x + 21, s.y - 8);
-            ctx.lineTo(s.x + 15, s.y - 2);
-            ctx.stroke();
-            
-            ctx.restore();
-        }
-
-        // ------ ИГРОВОЙ ЦИКЛ ------
-        function gameLoop() {
-            update();
-            draw();
-            requestAnimationFrame(gameLoop);
-        }
-
-        // ------ УПРАВЛЕНИЕ ------
-        function jump() {
-            if (gameOver) return;
-            jumpPending = true;
-        }
-
-        function handleJump(e) {
-            if (e) e.preventDefault();
-            jump();
-        }
-
-        document.addEventListener('keydown', (e) => {
-            if (e.code === 'Space' || e.key === 'ArrowUp' || e.key === 'w') {
-                e.preventDefault();
-                handleJump(e);
+            function handleKey(e) {
+                const key = e.key;
+                if (key === 'ArrowLeft' || key === 'a' || key === 'A') {
+                    e.preventDefault();
+                    keys.left = true;
+                } else if (key === 'ArrowRight' || key === 'd' || key === 'D') {
+                    e.preventDefault();
+                    keys.right = true;
+                } else if (key === 'ArrowUp' || key === 'w' || key === 'W') {
+                    e.preventDefault();
+                    keys.up = true;
+                } else if (key === 'ArrowDown' || key === 's' || key === 'S') {
+                    e.preventDefault();
+                    keys.down = true;
+                } else if (key === ' ' || key === 'Space') {
+                    e.preventDefault();
+                    if (!jumpPressed && gameActive && sonic.onGround) {
+                        sonic.vz = -9;
+                        sonic.onGround = false;
+                        jumpPressed = true;
+                        for (let i = 0; i < 8; i++) {
+                            particles.push({
+                                x: sonic.x + (Math.random() - 0.5) * 15,
+                                y: sonic.y + (Math.random() - 0.5) * 15,
+                                z: 0,
+                                vx: (Math.random() - 0.5) * 2,
+                                vy: (Math.random() - 0.5) * 2,
+                                vz: (Math.random() - 0.5) * 2,
+                                life: 12,
+                                maxLife: 12,
+                                size: 2 + Math.random() * 3,
+                                color: 'rgba(200,200,200,0.4)'
+                            });
+                        }
+                    }
+                }
             }
-        });
 
-        canvas.addEventListener('click', (e) => {
-            e.preventDefault();
-            handleJump(e);
-        });
+            function handleKeyUp(e) {
+                const key = e.key;
+                if (key === 'ArrowLeft' || key === 'a' || key === 'A') {
+                    e.preventDefault();
+                    keys.left = false;
+                } else if (key === 'ArrowRight' || key === 'd' || key === 'D') {
+                    e.preventDefault();
+                    keys.right = false;
+                } else if (key === 'ArrowUp' || key === 'w' || key === 'W') {
+                    e.preventDefault();
+                    keys.up = false;
+                } else if (key === 'ArrowDown' || key === 's' || key === 'S') {
+                    e.preventDefault();
+                    keys.down = false;
+                } else if (key === ' ' || key === 'Space') {
+                    e.preventDefault();
+                    jumpPressed = false;
+                }
+            }
 
-        canvas.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            handleJump(e);
-        }, { passive: false });
+            function gameLoop() {
+                // Управление в 3D
+                if (keys.left) {
+                    sonic.vx = Math.max(sonic.vx - 0.5, -STEP_3D * 2);
+                    sonic.facing = -1;
+                }
+                if (keys.right) {
+                    sonic.vx = Math.min(sonic.vx + 0.5, STEP_3D * 2);
+                    sonic.facing = 1;
+                }
+                if (keys.up) {
+                    sonic.vy = Math.max(sonic.vy - 0.5, -STEP_3D * 2);
+                }
+                if (keys.down) {
+                    sonic.vy = Math.min(sonic.vy + 0.5, STEP_3D * 2);
+                }
 
-        canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+                update();
+                draw();
+                requestAnimationFrame(gameLoop);
+            }
 
-        document.getElementById('restartBtn').addEventListener('click', (e) => {
-            e.preventDefault();
-            resetGame();
-        });
+            // ===== СОБЫТИЯ =====
+            window.addEventListener('keydown', handleKey);
+            window.addEventListener('keyup', handleKeyUp);
 
-        document.getElementById('restartBtn').addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            resetGame();
-        }, { passive: false });
+            canvas.addEventListener('click', () => {
+                if (!jumpPressed && gameActive && sonic.onGround) {
+                    sonic.vz = -9;
+                    sonic.onGround = false;
+                    jumpPressed = true;
+                }
+            });
 
-        // ------ СТАРТ ------
-        bestDisplay.textContent = bestScore;
-        resetGame();
-        gameLoop();
-    })();
-</script>
+            document.getElementById('resetButton').addEventListener('click', () => {
+                lives = 3;
+                level = 1;
+                score = 0;
+                ringCount = 0;
+                gameActive = true;
+                initLevel();
+                updateUI();
+            });
+
+            // ===== ЗАПУСК =====
+            initLevel();
+            updateUI();
+
+            window.addEventListener('keydown', (e) => {
+                if (e.key.startsWith('Arrow') || e.key === ' ' || e.key === 'Space') {
+                    e.preventDefault();
+                }
+            }, { passive: false });
+
+            gameLoop();
+
+        })();
+    </script>
 </body>
 </html>
