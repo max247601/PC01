@@ -3,8 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>СОНИК 3D – Бесконечный бег</title>
+    <title>СОНИК 3D – Бесконечный бег (PWA)</title>
+    <!-- PWA: манифест (встроен) -->
+    <link rel="manifest" href='data:application/json;charset=utf-8,'+encodeURIComponent(JSON.stringify({
+        "name": "Соник 3D – Бесконечный бег",
+        "short_name": "Соник 3D",
+        "description": "Бесконечный раннер с Соником, магазином и скинами",
+        "start_url": "index.html",
+        "display": "standalone",
+        "background_color": "#0a0a0a",
+        "theme_color": "#0a0a0a",
+        "icons": [
+            {
+                "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦔</text></svg>",
+                "sizes": "192x192",
+                "type": "image/svg+xml"
+            },
+            {
+                "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦔</text></svg>",
+                "sizes": "512x512",
+                "type": "image/svg+xml"
+            }
+        ]
+    }))'>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦔</text></svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦔</text></svg>">
+    <meta name="theme-color" content="#0a0a0a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
     <style>
+        /* ===== СТИЛИ ===== */
         * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
         body { background: #0a0a0a; overflow: hidden; font-family: 'Arial', sans-serif; touch-action: none; }
         canvas { display: block; touch-action: none; }
@@ -37,7 +66,7 @@
         .hud-item .value { color: #81C784; }
         .hud-item .boost { color: #FFD740; }
         .hud-item .boost-on { color: #FF6B6B; }
-        #restartBtn, #shopBtn, #fullscreenBtn {
+        #restartBtn, #shopBtn, #fullscreenBtn, #installBtn {
             background: #4CAF50;
             border: none;
             font-size: 13px;
@@ -52,6 +81,12 @@
             letter-spacing: 0.5px;
             pointer-events: auto;
         }
+        #installBtn {
+            background: #2196F3;
+            box-shadow: 0 4px 0 #0d47a1;
+            display: none;
+        }
+        #installBtn:active { transform: translateY(4px); box-shadow: 0 0px 0 #0d47a1; }
         #restartBtn:active, #shopBtn:active, #fullscreenBtn:active {
             transform: translateY(4px);
             box-shadow: 0 0px 0 #1B5E20;
@@ -91,6 +126,8 @@
             display: none;
             pointer-events: none;
             z-index: 20;
+            width: 90%;
+            max-width: 500px;
         }
         #gameOver h1 {
             font-size: 50px; color: #4CAF50;
@@ -98,7 +135,10 @@
             margin-bottom: 10px;
             animation: pulse 1s ease-in-out infinite;
         }
-        #gameOver p { font-size: 22px; color: #81C784; }
+        #gameOver p {
+            font-size: 22px; color: #81C784;
+            margin-bottom: 0;
+        }
         @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
         .shop-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -195,7 +235,9 @@
             .touch-btn { width: 55px; height: 55px; font-size: 24px; }
             .touch-btn.small { width: 48px; height: 48px; font-size: 20px; }
             .hud-item { font-size: 12px; padding: 4px 10px; }
-            #restartBtn, #shopBtn, #fullscreenBtn { font-size: 11px; padding: 4px 10px; }
+            #restartBtn, #shopBtn, #fullscreenBtn, #installBtn { font-size: 11px; padding: 4px 10px; }
+            #gameOver h1 { font-size: 36px; }
+            #gameOver p { font-size: 18px; }
         }
         @media (max-width: 400px) {
             .touch-btn { width: 44px; height: 44px; font-size: 20px; }
@@ -214,8 +256,9 @@
             <div class="hud-item">💰 Баланс: <span class="value" id="balanceDisplay">0</span></div>
             <div class="hud-item">⚡ Буст: <span class="boost" id="boostDisplay">OFF</span></div>
             <div class="hud-item"><button id="shopBtn">🛒</button></div>
-            <div class="hud-item"><button id="restartBtn">▶</button></div>
+            <div class="hud-item"><button id="restartBtn">▶ Новая игра</button></div>
             <div class="hud-item"><button id="fullscreenBtn">⛶</button></div>
+            <div class="hud-item"><button id="installBtn">📲 Установить</button></div>
         </div>
         <div id="gameOver">
             <h1>💥 ИГРА ОКОНЧЕНА</h1>
@@ -248,12 +291,11 @@
         <span class="highlight">(Прыжок отсутствует)</span>
     </div>
 
-    <!-- Подключаем Three.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js">
     </script>
 
     <script>
-        // ===== ПОЛНЫЙ КОД ИГРЫ (без PWA) =====
+        // ===== ОСНОВНОЙ КОД ИГРЫ (БЕЗ БОЛЬШОЙ КНОПКИ РЕСТАРТА) =====
         (function() {
             'use strict';
 
@@ -272,6 +314,7 @@
             const shopBalanceSpan = document.getElementById('shopBalance');
             const shopItemsContainer = document.getElementById('shopItemsContainer');
             const fullscreenBtn = document.getElementById('fullscreenBtn');
+            const installBtn = document.getElementById('installBtn');
 
             // --- СЕНСОРНЫЕ КНОПКИ ---
             const btnLeft = document.getElementById('btnLeft');
@@ -281,6 +324,30 @@
 
             // --- СОСТОЯНИЕ КЛАВИШ ---
             let keys = { w: false, a: false, s: false, d: false, shift: false };
+
+            // --- PWA: УСТАНОВКА ---
+            let deferredPrompt = null;
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+            if (!isStandalone) installBtn.style.display = 'block';
+
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                installBtn.style.display = 'block';
+            });
+
+            installBtn.addEventListener('click', async () => {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    const result = await deferredPrompt.userChoice;
+                    if (result.outcome === 'accepted') installBtn.style.display = 'none';
+                    deferredPrompt = null;
+                } else {
+                    alert('Нажмите "Добавить на экран дома" в меню браузера');
+                }
+            });
+
+            window.addEventListener('appinstalled', () => { installBtn.style.display = 'none'; });
 
             // --- ПОЛНОЭКРАННЫЙ РЕЖИМ ---
             function toggleFullscreen() {
@@ -439,7 +506,7 @@
                 bestSpan.textContent = bestScore;
             }
 
-            // --- ЗВУК ---
+            // --- ЗВУК (Чип и Дейл) ---
             let audioCtx = null;
             let boostInterval = null;
             let isSoundOn = false;
@@ -529,7 +596,7 @@
             ground.receiveShadow = true;
             scene.add(ground);
 
-            // --- ДОРОГА ---
+            // --- ДОРОГА (бесконечная) ---
             const roadMat = new THREE.MeshStandardMaterial({ color: 0x8D6E63, roughness: 1 });
             const roadGeo = new THREE.PlaneGeometry(8, 6000);
             const road = new THREE.Mesh(roadGeo, roadMat);
@@ -538,7 +605,6 @@
             road.receiveShadow = true;
             scene.add(road);
 
-            // Разметка
             for (let i = -1200; i < 1200; i++) {
                 const lineGeo = new THREE.PlaneGeometry(0.2, 0.6);
                 const lineMat = new THREE.MeshStandardMaterial({ color: 0xffffff, transparent: true, opacity: 0.15 });
@@ -548,7 +614,6 @@
                 scene.add(line);
             }
 
-            // Бордюры
             for (let side = -1; side <= 1; side += 2) {
                 const curbGeo = new THREE.BoxGeometry(0.2, 0.2, 6000);
                 const curbMat = new THREE.MeshStandardMaterial({ color: 0x6B4F3A });
@@ -558,7 +623,7 @@
                 scene.add(curb);
             }
 
-            // --- ДЕКОРАЦИИ ---
+            // --- ДЕКОРАЦИИ (генерируются бесконечно) ---
             function createTree(x, z) {
                 const group = new THREE.Group();
                 const scale = 0.8 + Math.random() * 0.6;
@@ -620,19 +685,17 @@
             sonicHead.castShadow = true;
             sonicGroup.add(sonicHead);
 
-            // Мордочка
+            // Остальные части (мордочка, нос, глаза, иголки, руки, ноги, обувь) – аналогично предыдущей версии
             const muzzleMat = new THREE.MeshStandardMaterial({ color: 0xF5CBA7 });
             const muzzle = new THREE.Mesh(new THREE.SphereGeometry(0.2, 8, 8), muzzleMat);
             muzzle.scale.set(0.8, 0.7, 0.5);
             muzzle.position.set(0, 0.9, 0.45);
             sonicGroup.add(muzzle);
 
-            // Нос
             const nose = new THREE.Mesh(new THREE.SphereGeometry(0.06, 8, 8), new THREE.MeshStandardMaterial({ color: 0x1a1a1a }));
             nose.position.set(0, 0.9, 0.55);
             sonicGroup.add(nose);
 
-            // Глаза
             const eyeWhite = new THREE.MeshStandardMaterial({ color: 0xffffff });
             const eyePupil = new THREE.MeshStandardMaterial({ color: 0x1a1a1a });
             const eyeGeo = new THREE.SphereGeometry(0.12, 8, 8);
@@ -646,7 +709,6 @@
                 sonicGroup.add(pupil);
             }
 
-            // Иголки
             const spikeMat = new THREE.MeshStandardMaterial({ color: 0x0D47A1 });
             for (let i = 0; i < 6; i++) {
                 const spike = new THREE.Mesh(new THREE.ConeGeometry(0.12, 0.4, 6), spikeMat);
@@ -656,7 +718,6 @@
                 sonicGroup.add(spike);
             }
 
-            // Руки
             const armMat = new THREE.MeshStandardMaterial({ color: 0x1565C0 });
             const armGeo = new THREE.SphereGeometry(0.12, 8, 8);
             for (let side = -1; side <= 1; side += 2) {
@@ -666,7 +727,6 @@
                 sonicGroup.add(arm);
             }
 
-            // Перчатки
             const gloveMat = new THREE.MeshStandardMaterial({ color: 0xffffff });
             const gloveGeo = new THREE.SphereGeometry(0.1, 8, 8);
             for (let side = -1; side <= 1; side += 2) {
@@ -675,7 +735,6 @@
                 sonicGroup.add(glove);
             }
 
-            // Ноги
             const legMat = new THREE.MeshStandardMaterial({ color: 0x1565C0 });
             const legGeo = new THREE.CylinderGeometry(0.12, 0.14, 0.3, 8);
             for (let side = -1; side <= 1; side += 2) {
@@ -685,7 +744,6 @@
                 sonicGroup.add(leg);
             }
 
-            // Обувь
             const shoeMat = new THREE.MeshStandardMaterial({ color: 0xE53935 });
             const shoeGeo = new THREE.BoxGeometry(0.2, 0.08, 0.3);
             for (let side = -1; side <= 1; side += 2) {
@@ -1008,7 +1066,7 @@
                 if (e.target === shopOverlay) shopOverlay.style.display = 'none';
             });
 
-            // --- ОБНОВЛЕНИЕ ИГРЫ ---
+            // --- ОБНОВЛЕНИЕ ИГРЫ (бесконечный мир) ---
             function update() {
                 if (!gameActive) { frame++; return; }
                 frame++;
@@ -1038,7 +1096,7 @@
                 if (sonicGroup.position.x > 4.2) sonicGroup.position.x = 4.2;
                 if (sonicGroup.position.x < -4.2) sonicGroup.position.x = -4.2;
 
-                // Сбор колец
+                // --- СБОР КОЛЕЦ ---
                 for (let i = rings3D.length - 1; i >= 0; i--) {
                     const r = rings3D[i];
                     if (r.collected) continue;
@@ -1059,7 +1117,7 @@
                     }
                 }
 
-                // Столкновения
+                // --- СТОЛКНОВЕНИЕ С ПРЕПЯТСТВИЯМИ ---
                 for (let i = obstacles3D.length - 1; i >= 0; i--) {
                     const o = obstacles3D[i];
                     const dx = sonicGroup.position.x - o.x;
@@ -1078,14 +1136,14 @@
                     }
                 }
 
-                // Генерация объектов
+                // --- ГЕНЕРАЦИЯ ОБЪЕКТОВ ВПЕРЕДИ ---
                 const spawnZ = sonicGroup.position.z + 20;
                 if (rings3D.length < 12) spawnRing3D(spawnZ + Math.random() * 10);
                 if (obstacles3D.length < 6) spawnObstacle3D(spawnZ + Math.random() * 10);
                 if (Math.random() < 0.02 && rings3D.length < 15) spawnRing3D(spawnZ + Math.random() * 8);
                 if (Math.random() < 0.015 && obstacles3D.length < 7) spawnObstacle3D(spawnZ + Math.random() * 8);
 
-                // Декорации
+                // --- ДЕКОРАЦИИ (генерация и удаление) ---
                 if (sonicGroup.position.z + 30 > decorationZRange.max) {
                     const newMin = decorationZRange.max;
                     const newMax = decorationZRange.max + 30;
@@ -1099,7 +1157,7 @@
                     }
                 }
 
-                // Искры при бусте
+                // --- ИСКРЫ ПРИ БУСТЕ ---
                 if (isBoost && frame % 2 === 0) {
                     const sx = sonicGroup.position.x + (Math.random() - 0.5) * 0.6;
                     const sy = 0.1;
@@ -1108,7 +1166,7 @@
                 }
                 updateSparks();
 
-                // Анимация Соника
+                // --- АНИМАЦИЯ СОНИКА ---
                 if (!isBoost) {
                     if (Math.abs(velocityX) > 0.01) {
                         const targetAngle = velocityX * 0.5;
@@ -1128,7 +1186,7 @@
                     }
                 }
 
-                // Камера
+                // --- КАМЕРА ---
                 const targetX = sonicGroup.position.x * 0.3;
                 const targetZ = sonicGroup.position.z + 8;
                 const targetY = 8 + Math.sin(frame * 0.01) * 0.5;
@@ -1137,7 +1195,7 @@
                 camera.position.y += (targetY - camera.position.y) * 0.03;
                 camera.lookAt(sonicGroup.position.x * 0.2, 0.3, sonicGroup.position.z - 2);
 
-                // Индикатор скорости
+                // --- ИНДИКАТОР СКОРОСТИ ---
                 const displaySpeed = Math.round(Math.abs(moveZ) * 100);
                 speedSpan.textContent = displaySpeed;
             }
@@ -1162,6 +1220,51 @@
 
             renderer.domElement.addEventListener('click', () => { if (!audioCtx) initAudio(); });
 
+        })();
+    </script>
+
+    <!-- ===== РЕГИСТРАЦИЯ SERVICE WORKER (для офлайн-работы) ===== -->
+    <script>
+        (function() {
+            if ('serviceWorker' in navigator) {
+                const swCode = `
+                    const CACHE_NAME = 'sonic-v3';
+                    const urlsToCache = [
+                        'index.html',
+                        'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js'
+                    ];
+
+                    self.addEventListener('install', event => {
+                        event.waitUntil(
+                            caches.open(CACHE_NAME)
+                                .then(cache => cache.addAll(urlsToCache))
+                        );
+                    });
+
+                    self.addEventListener('fetch', event => {
+                        event.respondWith(
+                            caches.match(event.request)
+                                .then(response => response || fetch(event.request))
+                        );
+                    });
+
+                    self.addEventListener('activate', event => {
+                        event.waitUntil(
+                            caches.keys().then(keys => {
+                                return Promise.all(
+                                    keys.filter(key => key !== CACHE_NAME)
+                                        .map(key => caches.delete(key))
+                                );
+                            })
+                        );
+                    });
+                `;
+                const blob = new Blob([swCode], { type: 'application/javascript' });
+                const swUrl = URL.createObjectURL(blob);
+                navigator.serviceWorker.register(swUrl)
+                    .then(() => console.log('Service Worker зарегистрирован – офлайн-режим'))
+                    .catch(err => console.warn('SW не зарегистрирован:', err));
+            }
         })();
     </script>
 </body>
