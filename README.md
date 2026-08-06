@@ -1,1 +1,1168 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>СОНИК 3D – Бесконечный бег</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+        body { background: #0a0a0a; overflow: hidden; font-family: 'Arial', sans-serif; touch-action: none; }
+        canvas { display: block; touch-action: none; }
+        #ui {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+        .hud {
+            position: absolute; top: 20px; left: 0; width: 100%;
+            padding: 0 15px;
+            display: flex; justify-content: space-between; align-items: center;
+            flex-wrap: wrap; gap: 8px;
+            pointer-events: none;
+        }
+        .hud-item {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 6px 14px;
+            border-radius: 40px;
+            border: 2px solid #4CAF50;
+            color: #fff;
+            font-size: 14px;
+            font-weight: bold;
+            backdrop-filter: blur(8px);
+            pointer-events: auto;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .hud-item .value { color: #81C784; }
+        .hud-item .boost { color: #FFD740; }
+        .hud-item .boost-on { color: #FF6B6B; }
+        #restartBtn, #shopBtn, #fullscreenBtn {
+            background: #4CAF50;
+            border: none;
+            font-size: 13px;
+            font-weight: bold;
+            padding: 6px 14px;
+            border-radius: 40px;
+            color: #fff;
+            box-shadow: 0 4px 0 #1B5E20;
+            cursor: pointer;
+            transition: 0.07s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            pointer-events: auto;
+        }
+        #restartBtn:active, #shopBtn:active, #fullscreenBtn:active {
+            transform: translateY(4px);
+            box-shadow: 0 0px 0 #1B5E20;
+        }
+        #restartBtn:disabled {
+            opacity: 0.5;
+            transform: translateY(4px);
+            box-shadow: 0 0px 0 #1B5E20;
+            pointer-events: none;
+        }
+        #fullscreenBtn {
+            background: #FF9800;
+            box-shadow: 0 4px 0 #E65100;
+        }
+        #fullscreenBtn:active { box-shadow: 0 0px 0 #E65100; }
+        .controls {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            padding: 6px 14px;
+            border-radius: 40px;
+            color: #aaa;
+            font-size: 12px;
+            backdrop-filter: blur(10px);
+            white-space: nowrap;
+            pointer-events: none;
+            display: none;
+        }
+        @media (pointer: fine) { .controls { display: block; } }
+        @media (pointer: coarse) { .controls { display: none; } }
+        #gameOver {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            display: none;
+            pointer-events: none;
+            z-index: 20;
+        }
+        #gameOver h1 {
+            font-size: 50px; color: #4CAF50;
+            text-shadow: 0 0 40px rgba(76,175,80,0.5);
+            margin-bottom: 10px;
+            animation: pulse 1s ease-in-out infinite;
+        }
+        #gameOver p { font-size: 22px; color: #81C784; }
+        @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
+        .shop-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            justify-content: center; align-items: center;
+            pointer-events: auto;
+            z-index: 100;
+        }
+        .shop-window {
+            background: #1a2a3a;
+            border: 3px solid #4CAF50;
+            border-radius: 30px;
+            padding: 20px 25px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            color: #fff;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+            pointer-events: auto;
+        }
+        .shop-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .shop-header h2 { font-size: 24px; color: #FFD740; }
+        .shop-header .close-btn {
+            background: #E53935; border: none; color: #fff; font-size: 22px;
+            width: 36px; height: 36px; border-radius: 50%; cursor: pointer; transition: 0.2s; pointer-events: auto;
+        }
+        .shop-header .close-btn:hover { background: #c62828; }
+        .shop-balance {
+            font-size: 18px; margin-bottom: 15px;
+            background: rgba(0,0,0,0.3); padding: 8px 18px; border-radius: 40px;
+            display: inline-block;
+        }
+        .shop-items { display: flex; flex-direction: column; gap: 10px; }
+        .shop-item {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid #4CAF50;
+            border-radius: 16px;
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: 0.2s;
+        }
+        .shop-item .info { display: flex; flex-direction: column; gap: 2px; }
+        .shop-item .info .name { font-size: 16px; font-weight: bold; color: #fff; }
+        .shop-item .info .desc { font-size: 13px; color: #aaa; }
+        .shop-item .info .price { font-size: 13px; color: #FFD740; }
+        .shop-item .buy-btn {
+            background: #4CAF50; border: none; padding: 6px 16px; border-radius: 40px;
+            color: #fff; font-weight: bold; cursor: pointer; transition: 0.2s;
+            pointer-events: auto;
+        }
+        .shop-item .buy-btn:disabled { background: #666; cursor: not-allowed; opacity: 0.5; }
+        .shop-item .buy-btn:hover:not(:disabled) { background: #66BB6A; }
+        .shop-item .buy-btn.bought { background: #FFD740; color: #1a2a3a; }
+        .shop-item .buy-btn.bought:hover { background: #ffca28; }
+        .shop-item .level { font-size: 13px; color: #81C784; }
+        /* Сенсорные кнопки */
+        #touchControls {
+            position: absolute; bottom: 15px; left: 0; width: 100%;
+            padding: 0 20px;
+            display: flex; justify-content: space-between;
+            pointer-events: none;
+            z-index: 50;
+        }
+        .touch-btn {
+            pointer-events: auto;
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(6px);
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            width: 70px; height: 70px;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 30px;
+            color: #fff;
+            font-weight: bold;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            touch-action: none;
+            user-select: none;
+            transition: 0.1s;
+        }
+        .touch-btn:active { background: rgba(255,255,255,0.35); transform: scale(0.92); }
+        .touch-btn.boost {
+            background: rgba(255,107,53,0.4);
+            border-color: #FF6B35;
+            font-size: 28px;
+        }
+        .touch-btn.boost:active { background: rgba(255,107,53,0.7); }
+        .touch-group { display: flex; gap: 15px; pointer-events: none; }
+        .touch-btn.small { width: 60px; height: 60px; font-size: 24px; }
+        @media (max-width: 600px) {
+            .touch-btn { width: 55px; height: 55px; font-size: 24px; }
+            .touch-btn.small { width: 48px; height: 48px; font-size: 20px; }
+            .hud-item { font-size: 12px; padding: 4px 10px; }
+            #restartBtn, #shopBtn, #fullscreenBtn { font-size: 11px; padding: 4px 10px; }
+        }
+        @media (max-width: 400px) {
+            .touch-btn { width: 44px; height: 44px; font-size: 20px; }
+            .touch-btn.small { width: 38px; height: 38px; font-size: 16px; }
+            .touch-group { gap: 8px; }
+        }
+    </style>
+</head>
+<body>
 
+    <div id="ui">
+        <div class="hud">
+            <div class="hud-item">🚶 Скорость: <span class="value" id="speedDisplay">0</span></div>
+            <div class="hud-item">🟡 Кольца: <span class="value" id="ringDisplay">0</span></div>
+            <div class="hud-item">🏆 Рекорд: <span class="value" id="bestDisplay">0</span></div>
+            <div class="hud-item">💰 Баланс: <span class="value" id="balanceDisplay">0</span></div>
+            <div class="hud-item">⚡ Буст: <span class="boost" id="boostDisplay">OFF</span></div>
+            <div class="hud-item"><button id="shopBtn">🛒</button></div>
+            <div class="hud-item"><button id="restartBtn">▶</button></div>
+            <div class="hud-item"><button id="fullscreenBtn">⛶</button></div>
+        </div>
+        <div id="gameOver">
+            <h1>💥 ИГРА ОКОНЧЕНА</h1>
+            <p>Колец собрано: <span id="finalScore">0</span></p>
+        </div>
+        <div class="shop-overlay" id="shopOverlay">
+            <div class="shop-window">
+                <div class="shop-header"><h2>🛒 Магазин</h2><button class="close-btn" id="closeShopBtn">✕</button></div>
+                <div class="shop-balance">💰 Баланс: <span id="shopBalance">0</span> колец</div>
+                <div class="shop-items" id="shopItemsContainer"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="touchControls">
+        <div class="touch-group">
+            <div class="touch-btn" id="btnLeft">◄</div>
+            <div class="touch-btn" id="btnRight">►</div>
+        </div>
+        <div class="touch-group">
+            <div class="touch-btn" id="btnForward">▲</div>
+            <div class="touch-btn boost" id="btnBoost">⚡</div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <kbd>W</kbd> — Вперёд &nbsp;|&nbsp;
+        <kbd>A</kbd> <kbd>D</kbd> — Влево/вправо &nbsp;|&nbsp;
+        <kbd class="boost-key">Shift</kbd> — Ускорение &nbsp;|&nbsp;
+        <span class="highlight">(Прыжок отсутствует)</span>
+    </div>
+
+    <!-- Подключаем Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js">
+    </script>
+
+    <script>
+        // ===== ПОЛНЫЙ КОД ИГРЫ (без PWA) =====
+        (function() {
+            'use strict';
+
+            // --- DOM ---
+            const speedSpan = document.getElementById('speedDisplay');
+            const ringSpan = document.getElementById('ringDisplay');
+            const bestSpan = document.getElementById('bestDisplay');
+            const balanceSpan = document.getElementById('balanceDisplay');
+            const boostSpan = document.getElementById('boostDisplay');
+            const finalScoreSpan = document.getElementById('finalScore');
+            const restartBtn = document.getElementById('restartBtn');
+            const gameOverDiv = document.getElementById('gameOver');
+            const shopBtn = document.getElementById('shopBtn');
+            const shopOverlay = document.getElementById('shopOverlay');
+            const closeShopBtn = document.getElementById('closeShopBtn');
+            const shopBalanceSpan = document.getElementById('shopBalance');
+            const shopItemsContainer = document.getElementById('shopItemsContainer');
+            const fullscreenBtn = document.getElementById('fullscreenBtn');
+
+            // --- СЕНСОРНЫЕ КНОПКИ ---
+            const btnLeft = document.getElementById('btnLeft');
+            const btnRight = document.getElementById('btnRight');
+            const btnForward = document.getElementById('btnForward');
+            const btnBoost = document.getElementById('btnBoost');
+
+            // --- СОСТОЯНИЕ КЛАВИШ ---
+            let keys = { w: false, a: false, s: false, d: false, shift: false };
+
+            // --- ПОЛНОЭКРАННЫЙ РЕЖИМ ---
+            function toggleFullscreen() {
+                if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+                    const el = document.documentElement;
+                    if (el.requestFullscreen) el.requestFullscreen();
+                    else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+                } else {
+                    if (document.exitFullscreen) document.exitFullscreen();
+                    else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+                }
+            }
+            fullscreenBtn.addEventListener('click', toggleFullscreen);
+
+            // --- ОБРАБОТЧИКИ СЕНСОРНЫХ КНОПОК ---
+            function setupTouchButton(el, keyOn, keyOff) {
+                if (!el) return;
+                const start = (e) => { e.preventDefault(); if (keyOn) keyOn(); };
+                const end = (e) => { e.preventDefault(); if (keyOff) keyOff(); };
+                el.addEventListener('touchstart', start, { passive: false });
+                el.addEventListener('touchend', end, { passive: false });
+                el.addEventListener('touchcancel', end, { passive: false });
+                el.addEventListener('mousedown', start);
+                el.addEventListener('mouseup', end);
+                el.addEventListener('mouseleave', end);
+            }
+            setupTouchButton(btnForward, () => { keys.w = true; }, () => { keys.w = false; });
+            setupTouchButton(btnLeft, () => { keys.a = true; }, () => { keys.a = false; });
+            setupTouchButton(btnRight, () => { keys.d = true; }, () => { keys.d = false; });
+            setupTouchButton(btnBoost, () => { keys.shift = true; }, () => { keys.shift = false; });
+
+            // --- КЛАВИАТУРА ---
+            document.addEventListener('keydown', (e) => {
+                const key = e.key.toLowerCase();
+                if (key === 'w' || key === 'ц') keys.w = true;
+                if (key === 'a' || key === 'ф') keys.a = true;
+                if (key === 's' || key === 'ы') keys.s = true;
+                if (key === 'd' || key === 'в') keys.d = true;
+                if (key === 'shift') { e.preventDefault();
+                    keys.shift = true; }
+            });
+            document.addEventListener('keyup', (e) => {
+                const key = e.key.toLowerCase();
+                if (key === 'w' || key === 'ц') keys.w = false;
+                if (key === 'a' || key === 'ф') keys.a = false;
+                if (key === 's' || key === 'ы') keys.s = false;
+                if (key === 'd' || key === 'в') keys.d = false;
+                if (key === 'shift') { e.preventDefault();
+                    keys.shift = false; }
+            });
+
+            window.addEventListener('blur', () => {
+                keys = { w: false, a: false, s: false, d: false, shift: false };
+                if (isBoost) {
+                    isBoost = false;
+                    speed = BASE_SPEED;
+                    boostSpan.textContent = 'OFF';
+                    boostSpan.className = 'boost';
+                    stopSound();
+                }
+            });
+
+            // --- СОСТОЯНИЕ ИГРЫ ---
+            let score = 0;
+            let bestScore = 0;
+            let totalRings = 0;
+            let gameActive = true;
+            let frame = 0;
+            let isBoost = false;
+            let speed = 0.08;
+            const BASE_SPEED = 0.08;
+            const BOOST_SPEED = 0.16;
+
+            // --- МАГАЗИН ---
+            const shopItems = [{
+                id: 'speed',
+                name: '🚀 Ускорение',
+                desc: 'Увеличивает скорость на 20% (макс. 5 раз)',
+                price: 50,
+                maxLevel: 5,
+                level: 0,
+                effect: () => { speed = BASE_SPEED * (1 + shopItems[0].level * 0.2); }
+            }, {
+                id: 'skin_gold',
+                name: '✨ Золотой Соник',
+                desc: 'Меняет цвет на золотой',
+                price: 100,
+                maxLevel: 1,
+                level: 0,
+                effect: () => {
+                    if (shopItems[1].level === 1) {
+                        sonicBody.material.color.setHex(0xFFD700);
+                        sonicHead.material.color.setHex(0xFFD700);
+                    }
+                }
+            }, {
+                id: 'skin_shadow',
+                name: '🌑 Теневой Соник',
+                desc: 'Меняет цвет на чёрный с фиолетовым',
+                price: 100,
+                maxLevel: 1,
+                level: 0,
+                effect: () => {
+                    if (shopItems[2].level === 1) {
+                        sonicBody.material.color.setHex(0x2c2c3a);
+                        sonicHead.material.color.setHex(0x2c2c3a);
+                    }
+                }
+            }];
+
+            // --- ЗАГРУЗКА ДАННЫХ ---
+            function loadData() {
+                try {
+                    const savedBest = localStorage.getItem('sonicNoJumpBest');
+                    if (savedBest) bestScore = parseInt(savedBest, 10) || 0;
+                    const savedBalance = localStorage.getItem('sonicNoJumpTotalRings');
+                    if (savedBalance) totalRings = parseInt(savedBalance, 10) || 0;
+                    const savedShop = localStorage.getItem('sonicNoJumpShop');
+                    if (savedShop) {
+                        const data = JSON.parse(savedShop);
+                        shopItems.forEach(item => {
+                            if (data[item.id] !== undefined) item.level = data[item.id];
+                        });
+                    }
+                } catch (e) {}
+                bestSpan.textContent = bestScore;
+                balanceSpan.textContent = totalRings;
+                applyShopEffects();
+            }
+
+            function saveData() {
+                try {
+                    localStorage.setItem('sonicNoJumpBest', String(bestScore));
+                    localStorage.setItem('sonicNoJumpTotalRings', String(totalRings));
+                    const shopData = {};
+                    shopItems.forEach(item => { shopData[item.id] = item.level; });
+                    localStorage.setItem('sonicNoJumpShop', JSON.stringify(shopData));
+                } catch (e) {}
+            }
+
+            function applyShopEffects() {
+                speed = BASE_SPEED * (1 + shopItems[0].level * 0.2);
+                const gold = shopItems[1].level;
+                const shadow = shopItems[2].level;
+                if (gold === 1) {
+                    sonicBody.material.color.setHex(0xFFD700);
+                    sonicHead.material.color.setHex(0xFFD700);
+                } else if (shadow === 1) {
+                    sonicBody.material.color.setHex(0x2c2c3a);
+                    sonicHead.material.color.setHex(0x2c2c3a);
+                } else {
+                    sonicBody.material.color.setHex(0x1565C0);
+                    sonicHead.material.color.setHex(0x1A73E8);
+                }
+                balanceSpan.textContent = totalRings;
+                bestSpan.textContent = bestScore;
+            }
+
+            // --- ЗВУК ---
+            let audioCtx = null;
+            let boostInterval = null;
+            let isSoundOn = false;
+
+            function initAudio() {
+                if (!audioCtx) {
+                    try {
+                        audioCtx = new(window.AudioContext || window.webkitAudioContext)();
+                    } catch (e) {}
+                }
+                if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+            }
+
+            function playTick() {
+                if (!audioCtx) return;
+                try {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'square';
+                    osc.frequency.value = 600 + Math.random() * 500;
+                    gain.gain.setValueAtTime(0.10, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.04);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.04);
+                } catch (e) {}
+            }
+
+            function startSound() {
+                if (isSoundOn) return;
+                initAudio();
+                if (!audioCtx) return;
+                isSoundOn = true;
+                boostInterval = setInterval(playTick, 130);
+            }
+
+            function stopSound() {
+                isSoundOn = false;
+                if (boostInterval) {
+                    clearInterval(boostInterval);
+                    boostInterval = null;
+                }
+            }
+
+            // --- THREE.JS СЦЕНА ---
+            const scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x87CEEB);
+            scene.fog = new THREE.Fog(0x87CEEB, 60, 120);
+
+            const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 200);
+            camera.position.set(0, 8, 12);
+
+            const renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            document.body.prepend(renderer.domElement);
+
+            // --- ОСВЕЩЕНИЕ ---
+            const ambient = new THREE.AmbientLight(0x4466aa, 0.4);
+            scene.add(ambient);
+
+            const sun = new THREE.DirectionalLight(0xffeedd, 1.2);
+            sun.position.set(20, 30, 10);
+            sun.castShadow = true;
+            sun.shadow.mapSize.width = 1024;
+            sun.shadow.mapSize.height = 1024;
+            sun.shadow.camera.near = 0.1;
+            sun.shadow.camera.far = 150;
+            sun.shadow.camera.left = -40;
+            sun.shadow.camera.right = 40;
+            sun.shadow.camera.top = 40;
+            sun.shadow.camera.bottom = -40;
+            scene.add(sun);
+
+            const hemi = new THREE.HemisphereLight(0x87CEEB, 0x3a7a3a, 0.5);
+            scene.add(hemi);
+
+            // --- ЗЕМЛЯ ---
+            const groundGeo = new THREE.PlaneGeometry(400, 400);
+            const groundMat = new THREE.MeshStandardMaterial({ color: 0x4CAF50, roughness: 0.9 });
+            const ground = new THREE.Mesh(groundGeo, groundMat);
+            ground.rotation.x = -Math.PI / 2;
+            ground.position.set(0, -0.05, 0);
+            ground.receiveShadow = true;
+            scene.add(ground);
+
+            // --- ДОРОГА ---
+            const roadMat = new THREE.MeshStandardMaterial({ color: 0x8D6E63, roughness: 1 });
+            const roadGeo = new THREE.PlaneGeometry(8, 6000);
+            const road = new THREE.Mesh(roadGeo, roadMat);
+            road.rotation.x = -Math.PI / 2;
+            road.position.set(0, 0.01, 0);
+            road.receiveShadow = true;
+            scene.add(road);
+
+            // Разметка
+            for (let i = -1200; i < 1200; i++) {
+                const lineGeo = new THREE.PlaneGeometry(0.2, 0.6);
+                const lineMat = new THREE.MeshStandardMaterial({ color: 0xffffff, transparent: true, opacity: 0.15 });
+                const line = new THREE.Mesh(lineGeo, lineMat);
+                line.rotation.x = -Math.PI / 2;
+                line.position.set(0, 0.015, i * 2.5);
+                scene.add(line);
+            }
+
+            // Бордюры
+            for (let side = -1; side <= 1; side += 2) {
+                const curbGeo = new THREE.BoxGeometry(0.2, 0.2, 6000);
+                const curbMat = new THREE.MeshStandardMaterial({ color: 0x6B4F3A });
+                const curb = new THREE.Mesh(curbGeo, curbMat);
+                curb.position.set(side * 4.1, 0.1, 0);
+                curb.receiveShadow = true;
+                scene.add(curb);
+            }
+
+            // --- ДЕКОРАЦИИ ---
+            function createTree(x, z) {
+                const group = new THREE.Group();
+                const scale = 0.8 + Math.random() * 0.6;
+                const trunkMat = new THREE.MeshStandardMaterial({ color: 0x8B4513 });
+                const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.3 * scale, 0.5 * scale, 2 * scale, 6), trunkMat);
+                trunk.position.y = 1 * scale;
+                trunk.castShadow = true;
+                group.add(trunk);
+
+                const crownMat = new THREE.MeshStandardMaterial({ color: new THREE.Color().setHSL(0.25 + Math.random() * 0.1, 0.6,
+                        0.3) });
+                for (let i = 0; i < 5; i++) {
+                    const size = (0.6 + Math.random() * 0.6) * scale;
+                    const crown = new THREE.Mesh(new THREE.SphereGeometry(size, 6, 6), crownMat);
+                    crown.position.set((Math.random() - 0.5) * 0.8 * scale, 1.8 * scale + Math.random() * 0.6 * scale, (Math
+                    .random() - 0.5) * 0.8 * scale);
+                    crown.castShadow = true;
+                    group.add(crown);
+                }
+                group.position.set(x, 0, z);
+                return group;
+            }
+
+            let decorations = [];
+            let decorationZRange = { min: -30, max: 30 };
+
+            function generateDecorations(zMin, zMax) {
+                const count = Math.floor((zMax - zMin) * 0.4);
+                for (let i = 0; i < count; i++) {
+                    let x = (Math.random() - 0.5) * 140;
+                    let z = zMin + Math.random() * (zMax - zMin);
+                    if (Math.abs(z) < 5) continue;
+                    let tooClose = false;
+                    for (const d of decorations) {
+                        if (d.position.distanceTo(new THREE.Vector3(x, 0, z)) < 5) { tooClose = true; break; }
+                    }
+                    if (tooClose) continue;
+                    const tree = createTree(x, z);
+                    scene.add(tree);
+                    decorations.push(tree);
+                }
+            }
+            generateDecorations(-30, 40);
+
+            // --- СОНИК (3D) ---
+            const sonicGroup = new THREE.Group();
+            let sonicBody, sonicHead;
+
+            const bodyMat = new THREE.MeshStandardMaterial({ color: 0x1565C0, roughness: 0.3 });
+            sonicBody = new THREE.Mesh(new THREE.SphereGeometry(0.5, 12, 12), bodyMat);
+            sonicBody.scale.set(0.8, 0.9, 0.6);
+            sonicBody.position.y = 0.7;
+            sonicBody.castShadow = true;
+            sonicGroup.add(sonicBody);
+
+            const headMat = new THREE.MeshStandardMaterial({ color: 0x1A73E8, roughness: 0.3 });
+            sonicHead = new THREE.Mesh(new THREE.SphereGeometry(0.4, 12, 12), headMat);
+            sonicHead.position.set(0, 1.1, 0.1);
+            sonicHead.castShadow = true;
+            sonicGroup.add(sonicHead);
+
+            // Мордочка
+            const muzzleMat = new THREE.MeshStandardMaterial({ color: 0xF5CBA7 });
+            const muzzle = new THREE.Mesh(new THREE.SphereGeometry(0.2, 8, 8), muzzleMat);
+            muzzle.scale.set(0.8, 0.7, 0.5);
+            muzzle.position.set(0, 0.9, 0.45);
+            sonicGroup.add(muzzle);
+
+            // Нос
+            const nose = new THREE.Mesh(new THREE.SphereGeometry(0.06, 8, 8), new THREE.MeshStandardMaterial({ color: 0x1a1a1a }));
+            nose.position.set(0, 0.9, 0.55);
+            sonicGroup.add(nose);
+
+            // Глаза
+            const eyeWhite = new THREE.MeshStandardMaterial({ color: 0xffffff });
+            const eyePupil = new THREE.MeshStandardMaterial({ color: 0x1a1a1a });
+            const eyeGeo = new THREE.SphereGeometry(0.12, 8, 8);
+            const pupilGeo = new THREE.SphereGeometry(0.06, 8, 8);
+            for (let side = -1; side <= 1; side += 2) {
+                const eye = new THREE.Mesh(eyeGeo, eyeWhite);
+                eye.position.set(side * 0.15, 1.1, 0.4);
+                sonicGroup.add(eye);
+                const pupil = new THREE.Mesh(pupilGeo, eyePupil);
+                pupil.position.set(side * 0.12, 1.08, 0.46);
+                sonicGroup.add(pupil);
+            }
+
+            // Иголки
+            const spikeMat = new THREE.MeshStandardMaterial({ color: 0x0D47A1 });
+            for (let i = 0; i < 6; i++) {
+                const spike = new THREE.Mesh(new THREE.ConeGeometry(0.12, 0.4, 6), spikeMat);
+                spike.position.set((i - 2.5) * 0.12, 1.0 + i * 0.05, -0.35 - i * 0.03);
+                spike.rotation.x = -0.3 + i * 0.05;
+                spike.castShadow = true;
+                sonicGroup.add(spike);
+            }
+
+            // Руки
+            const armMat = new THREE.MeshStandardMaterial({ color: 0x1565C0 });
+            const armGeo = new THREE.SphereGeometry(0.12, 8, 8);
+            for (let side = -1; side <= 1; side += 2) {
+                const arm = new THREE.Mesh(armGeo, armMat);
+                arm.position.set(side * 0.45, 0.7, 0);
+                arm.scale.set(0.8, 0.8, 0.6);
+                sonicGroup.add(arm);
+            }
+
+            // Перчатки
+            const gloveMat = new THREE.MeshStandardMaterial({ color: 0xffffff });
+            const gloveGeo = new THREE.SphereGeometry(0.1, 8, 8);
+            for (let side = -1; side <= 1; side += 2) {
+                const glove = new THREE.Mesh(gloveGeo, gloveMat);
+                glove.position.set(side * 0.5, 0.7, 0);
+                sonicGroup.add(glove);
+            }
+
+            // Ноги
+            const legMat = new THREE.MeshStandardMaterial({ color: 0x1565C0 });
+            const legGeo = new THREE.CylinderGeometry(0.12, 0.14, 0.3, 8);
+            for (let side = -1; side <= 1; side += 2) {
+                const leg = new THREE.Mesh(legGeo, legMat);
+                leg.position.set(side * 0.15, 0.25, 0.05);
+                leg.castShadow = true;
+                sonicGroup.add(leg);
+            }
+
+            // Обувь
+            const shoeMat = new THREE.MeshStandardMaterial({ color: 0xE53935 });
+            const shoeGeo = new THREE.BoxGeometry(0.2, 0.08, 0.3);
+            for (let side = -1; side <= 1; side += 2) {
+                const shoe = new THREE.Mesh(shoeGeo, shoeMat);
+                shoe.position.set(side * 0.15, 0.1, 0.1);
+                shoe.castShadow = true;
+                sonicGroup.add(shoe);
+            }
+
+            sonicGroup.position.set(0, 0, 0);
+            scene.add(sonicGroup);
+
+            // --- КОЛЬЦА ---
+            function createRing3D() {
+                const group = new THREE.Group();
+                const ringMat = new THREE.MeshStandardMaterial({ color: 0xFFD700, metalness: 0.8, roughness: 0.2,
+                    emissive: 0xFFD700, emissiveIntensity: 0.1 });
+                const ring = new THREE.Mesh(new THREE.TorusGeometry(0.2, 0.04, 12, 20), ringMat);
+                ring.rotation.x = Math.PI / 2;
+                ring.castShadow = true;
+                group.add(ring);
+                const glow = new THREE.Mesh(new THREE.SphereGeometry(0.35, 8, 8), new THREE
+                .MeshBasicMaterial({ color: 0xFFD700, transparent: true, opacity: 0.08 }));
+                group.add(glow);
+                return group;
+            }
+
+            let rings3D = [];
+
+            function spawnRing3D(zPos) {
+                const ring = createRing3D();
+                const x = (Math.random() - 0.5) * 3.5;
+                const z = zPos || 10 + Math.random() * 6;
+                ring.position.set(x, 0.6 + Math.random() * 0.3, z);
+                scene.add(ring);
+                rings3D.push({
+                    mesh: ring,
+                    x: x,
+                    z: z,
+                    collected: false,
+                    bobPhase: Math.random() * Math.PI * 2
+                });
+            }
+
+            // --- ПРЕПЯТСТВИЯ ---
+            function createObstacle3D(type) {
+                const group = new THREE.Group();
+                if (type === 0) {
+                    const mat = new THREE.MeshStandardMaterial({ color: 0xE53935 });
+                    const wall = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.6, 0.15), mat);
+                    wall.position.y = 0.3;
+                    wall.castShadow = true;
+                    group.add(wall);
+                    const stripeMat = new THREE.MeshStandardMaterial({ color: 0xffffff });
+                    const stripe1 = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.05, 0.03), stripeMat);
+                    stripe1.position.set(0, 0.1, 0.1);
+                    group.add(stripe1);
+                    const stripe2 = stripe1.clone();
+                    stripe2.position.y = 0.5;
+                    group.add(stripe2);
+                } else if (type === 1) {
+                    const mat = new THREE.MeshStandardMaterial({ color: 0x8D6E63 });
+                    const box = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.4, 0.5), mat);
+                    box.position.y = 0.2;
+                    box.castShadow = true;
+                    group.add(box);
+                    const crossMat = new THREE.MeshStandardMaterial({ color: 0x4E342E });
+                    const cross1 = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.3, 0.4), crossMat);
+                    cross1.position.set(0, 0.2, 0);
+                    group.add(cross1);
+                    const cross2 = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.3, 0.02), crossMat);
+                    cross2.position.set(0, 0.2, 0);
+                    group.add(cross2);
+                } else {
+                    const spikeMat = new THREE.MeshStandardMaterial({ color: 0x616161, metalness: 0.5 });
+                    for (let i = 0; i < 5; i++) {
+                        const spike = new THREE.Mesh(new THREE.ConeGeometry(0.07, 0.2, 6), spikeMat);
+                        spike.position.set((i - 2) * 0.15, 0.1, 0);
+                        spike.castShadow = true;
+                        group.add(spike);
+                    }
+                    const base = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.05, 0.3), new THREE
+                    .MeshStandardMaterial({ color: 0x424242 }));
+                    base.position.y = 0.025;
+                    group.add(base);
+                }
+                return group;
+            }
+
+            let obstacles3D = [];
+
+            function spawnObstacle3D(zPos) {
+                const type = Math.floor(Math.random() * 3);
+                const ob = createObstacle3D(type);
+                const x = (Math.random() - 0.5) * 3.5;
+                const z = zPos || 10 + Math.random() * 8;
+                ob.position.set(x, 0, z);
+                scene.add(ob);
+                obstacles3D.push({
+                    mesh: ob,
+                    x: x,
+                    z: z,
+                    type: type
+                });
+            }
+
+            // --- ИСКРЫ ---
+            let sparkParticles = [];
+
+            function createSpark(x, y, z) {
+                const geo = new THREE.SphereGeometry(0.04, 4, 4);
+                const mat = new THREE.MeshBasicMaterial({ color: 0xFFD740, transparent: true, opacity: 0.8 });
+                const spark = new THREE.Mesh(geo, mat);
+                spark.position.set(x, y, z);
+                scene.add(spark);
+                spark.velocity = new THREE.Vector3(
+                    (Math.random() - 0.5) * 0.1,
+                    Math.random() * 0.1,
+                    (Math.random() - 0.5) * 0.1
+                );
+                spark.life = 1.0;
+                sparkParticles.push(spark);
+            }
+
+            function updateSparks() {
+                for (let i = sparkParticles.length - 1; i >= 0; i--) {
+                    const s = sparkParticles[i];
+                    s.position.add(s.velocity);
+                    s.life -= 0.02;
+                    s.material.opacity = s.life * 0.8;
+                    s.scale.setScalar(0.5 + s.life * 0.5);
+                    if (s.life <= 0) {
+                        scene.remove(s);
+                        sparkParticles.splice(i, 1);
+                    }
+                }
+            }
+
+            // --- ИНИЦИАЛИЗАЦИЯ ---
+            for (let i = 0; i < 15; i++) {
+                spawnRing3D(3 + i * 3);
+                if (i > 0 && i % 2 === 0) spawnObstacle3D(4 + i * 2.5);
+            }
+
+            // --- УПРАВЛЕНИЕ ---
+            let velocityX = 0;
+            const MOVE_SPEED = 0.025;
+            const FRICTION = 0.92;
+            const MAX_SPEED = 0.2;
+            let currentMoveSpeed = MOVE_SPEED;
+
+            // --- РЕСТАРТ ---
+            restartBtn.addEventListener('click', resetGame);
+
+            function resetGame() {
+                rings3D.forEach(r => scene.remove(r.mesh));
+                obstacles3D.forEach(o => scene.remove(o.mesh));
+                decorations.forEach(d => scene.remove(d));
+                sparkParticles.forEach(s => scene.remove(s));
+                rings3D = [];
+                obstacles3D = [];
+                decorations = [];
+                sparkParticles = [];
+
+                score = 0;
+                gameActive = true;
+                gameOverDiv.style.display = 'none';
+                restartBtn.disabled = true;
+                frame = 0;
+                velocityX = 0;
+
+                if (isBoost) {
+                    isBoost = false;
+                    speed = BASE_SPEED;
+                    boostSpan.textContent = 'OFF';
+                    boostSpan.className = 'boost';
+                    stopSound();
+                }
+
+                sonicGroup.scale.set(1, 1, 1);
+                applyShopEffects();
+                sonicBody.scale.set(0.8, 0.9, 0.6);
+                sonicHead.scale.set(1, 1, 1);
+                sonicHead.position.y = 1.1;
+                sonicGroup.children.forEach(child => child.visible = true);
+                sonicBody.material.emissive = new THREE.Color(0x000000);
+                sonicBody.material.emissiveIntensity = 0;
+                sonicHead.material.emissive = new THREE.Color(0x000000);
+                sonicHead.material.emissiveIntensity = 0;
+                currentMoveSpeed = MOVE_SPEED;
+
+                sonicGroup.position.set(0, 0, 0);
+
+                decorationZRange = { min: -20, max: 30 };
+                generateDecorations(-30, 40);
+
+                for (let i = 0; i < 15; i++) {
+                    spawnRing3D(3 + i * 3);
+                    if (i > 0 && i % 2 === 0) spawnObstacle3D(4 + i * 2.5);
+                }
+
+                ringSpan.textContent = '0';
+                speedSpan.textContent = '0';
+                camera.position.set(0, 8, 12);
+                camera.lookAt(0, 0, 0);
+            }
+
+            // --- БУСТ ---
+            function applyBoost() {
+                if (!gameActive || isBoost) return;
+                isBoost = true;
+                boostSpan.textContent = 'ON';
+                boostSpan.className = 'boost boost-on';
+                sonicGroup.scale.set(0.9, 0.7, 0.9);
+                sonicBody.material.color.setHex(0x2196F3);
+                sonicHead.material.color.setHex(0x2196F3);
+                sonicBody.scale.set(0.9, 0.9, 0.9);
+                sonicHead.scale.set(0.9, 0.9, 0.9);
+                sonicHead.position.y = 0.7;
+                sonicGroup.children.forEach(child => {
+                    if (child !== sonicBody && child !== sonicHead) child.visible = false;
+                });
+                sonicBody.material.emissive = new THREE.Color(0x2196F3);
+                sonicBody.material.emissiveIntensity = 0.3;
+                sonicHead.material.emissive = new THREE.Color(0x2196F3);
+                sonicHead.material.emissiveIntensity = 0.3;
+                startSound();
+            }
+
+            function removeBoost() {
+                if (!isBoost) return;
+                isBoost = false;
+                boostSpan.textContent = 'OFF';
+                boostSpan.className = 'boost';
+                applyShopEffects();
+                sonicGroup.scale.set(1, 1, 1);
+                sonicBody.scale.set(0.8, 0.9, 0.6);
+                sonicHead.scale.set(1, 1, 1);
+                sonicHead.position.y = 1.1;
+                sonicGroup.children.forEach(child => child.visible = true);
+                sonicBody.material.emissive = new THREE.Color(0x000000);
+                sonicBody.material.emissiveIntensity = 0;
+                sonicHead.material.emissive = new THREE.Color(0x000000);
+                sonicHead.material.emissiveIntensity = 0;
+                sparkParticles.forEach(s => scene.remove(s));
+                sparkParticles = [];
+                stopSound();
+            }
+
+            // --- МАГАЗИН ---
+            function renderShop() {
+                shopBalanceSpan.textContent = totalRings;
+                shopItemsContainer.innerHTML = '';
+                shopItems.forEach((item, index) => {
+                    const div = document.createElement('div');
+                    div.className = 'shop-item';
+                    const isMaxLevel = item.level >= item.maxLevel;
+                    const canBuy = !isMaxLevel && totalRings >= item.price;
+                    const bought = item.level > 0 && item.maxLevel === 1;
+                    div.innerHTML = `
+                        <div class="info">
+                            <div class="name">${item.name}</div>
+                            <div class="desc">${item.desc}</div>
+                            <div class="price">💰 ${item.price} колец</div>
+                            ${item.maxLevel > 1 ? `<div class="level">Уровень: ${item.level}/${item.maxLevel}</div>` : ''}
+                        </div>
+                        <button class="buy-btn ${bought ? 'bought' : ''}" data-index="${index}" ${!canBuy && !bought ? 'disabled' : ''}>
+                            ${bought ? '✅ Куплено' : (isMaxLevel ? 'MAX' : 'Купить')}
+                        </button>
+                    `;
+                    shopItemsContainer.appendChild(div);
+                });
+                document.querySelectorAll('.buy-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const index = parseInt(btn.dataset.index);
+                        buyItem(index);
+                    });
+                });
+            }
+
+            function buyItem(index) {
+                const item = shopItems[index];
+                if (!item) return;
+                if (item.level >= item.maxLevel) return;
+                if (totalRings < item.price) return;
+
+                totalRings -= item.price;
+                item.level++;
+                if (item.effect) item.effect();
+
+                if (item.id === 'skin_gold' && item.level === 1) {
+                    const shadow = shopItems.find(i => i.id === 'skin_shadow');
+                    if (shadow && shadow.level === 1) {
+                        shadow.level = 0;
+                        applyShopEffects();
+                    }
+                }
+                if (item.id === 'skin_shadow' && item.level === 1) {
+                    const gold = shopItems.find(i => i.id === 'skin_gold');
+                    if (gold && gold.level === 1) {
+                        gold.level = 0;
+                        applyShopEffects();
+                    }
+                }
+
+                saveData();
+                balanceSpan.textContent = totalRings;
+                renderShop();
+                applyShopEffects();
+            }
+
+            shopBtn.addEventListener('click', () => {
+                shopOverlay.style.display = 'flex';
+                renderShop();
+            });
+            closeShopBtn.addEventListener('click', () => {
+                shopOverlay.style.display = 'none';
+            });
+            shopOverlay.addEventListener('click', (e) => {
+                if (e.target === shopOverlay) shopOverlay.style.display = 'none';
+            });
+
+            // --- ОБНОВЛЕНИЕ ИГРЫ ---
+            function update() {
+                if (!gameActive) { frame++; return; }
+                frame++;
+
+                if (keys.shift && !isBoost && gameActive) applyBoost();
+                if (!keys.shift && isBoost) removeBoost();
+
+                let moveZ = 0;
+                if (keys.w) moveZ = speed;
+                if (keys.s) moveZ = -speed * 0.5;
+                if (keys.w && keys.s) moveZ = 0;
+
+                let moveX = 0;
+                if (keys.a) moveX -= currentMoveSpeed;
+                if (keys.d) moveX += currentMoveSpeed;
+                velocityX += moveX;
+                velocityX *= FRICTION;
+                if (Math.abs(velocityX) < 0.001) velocityX = 0;
+                if (Math.abs(velocityX) > MAX_SPEED) {
+                    velocityX = Math.sign(velocityX) * MAX_SPEED;
+                }
+
+                sonicGroup.position.x += velocityX;
+                sonicGroup.position.z += moveZ;
+                sonicGroup.position.y = 0;
+
+                if (sonicGroup.position.x > 4.2) sonicGroup.position.x = 4.2;
+                if (sonicGroup.position.x < -4.2) sonicGroup.position.x = -4.2;
+
+                // Сбор колец
+                for (let i = rings3D.length - 1; i >= 0; i--) {
+                    const r = rings3D[i];
+                    if (r.collected) continue;
+                    r.mesh.position.y = 0.6 + Math.sin(frame * 0.02 + r.bobPhase) * 0.12;
+                    r.mesh.rotation.y += 0.02;
+                    const dx = sonicGroup.position.x - r.x;
+                    const dz = sonicGroup.position.z - r.z;
+                    const dist = Math.sqrt(dx * dx + dz * dz);
+                    if (dist < 0.7) {
+                        r.collected = true;
+                        scene.remove(r.mesh);
+                        score++;
+                        ringSpan.textContent = score;
+                        if (score > bestScore) {
+                            bestScore = score;
+                            saveData();
+                        }
+                    }
+                }
+
+                // Столкновения
+                for (let i = obstacles3D.length - 1; i >= 0; i--) {
+                    const o = obstacles3D[i];
+                    const dx = sonicGroup.position.x - o.x;
+                    const dz = sonicGroup.position.z - o.z;
+                    const dist = Math.sqrt(dx * dx + dz * dz);
+                    if (dist < 0.6) {
+                        gameActive = false;
+                        gameOverDiv.style.display = 'block';
+                        finalScoreSpan.textContent = score;
+                        restartBtn.disabled = false;
+                        totalRings += score;
+                        balanceSpan.textContent = totalRings;
+                        saveData();
+                        if (isBoost) removeBoost();
+                        break;
+                    }
+                }
+
+                // Генерация объектов
+                const spawnZ = sonicGroup.position.z + 20;
+                if (rings3D.length < 12) spawnRing3D(spawnZ + Math.random() * 10);
+                if (obstacles3D.length < 6) spawnObstacle3D(spawnZ + Math.random() * 10);
+                if (Math.random() < 0.02 && rings3D.length < 15) spawnRing3D(spawnZ + Math.random() * 8);
+                if (Math.random() < 0.015 && obstacles3D.length < 7) spawnObstacle3D(spawnZ + Math.random() * 8);
+
+                // Декорации
+                if (sonicGroup.position.z + 30 > decorationZRange.max) {
+                    const newMin = decorationZRange.max;
+                    const newMax = decorationZRange.max + 30;
+                    generateDecorations(newMin, newMax);
+                    decorationZRange.max = newMax;
+                }
+                for (let i = decorations.length - 1; i >= 0; i--) {
+                    if (decorations[i].position.z < sonicGroup.position.z - 20) {
+                        scene.remove(decorations[i]);
+                        decorations.splice(i, 1);
+                    }
+                }
+
+                // Искры при бусте
+                if (isBoost && frame % 2 === 0) {
+                    const sx = sonicGroup.position.x + (Math.random() - 0.5) * 0.6;
+                    const sy = 0.1;
+                    const sz = sonicGroup.position.z + (Math.random() - 0.5) * 0.6 - 0.5;
+                    createSpark(sx, sy, sz);
+                }
+                updateSparks();
+
+                // Анимация Соника
+                if (!isBoost) {
+                    if (Math.abs(velocityX) > 0.01) {
+                        const targetAngle = velocityX * 0.5;
+                        let diff = targetAngle - sonicGroup.rotation.y;
+                        while (diff > Math.PI) diff -= Math.PI * 2;
+                        while (diff < -Math.PI) diff += Math.PI * 2;
+                        sonicGroup.rotation.y += diff * 0.08;
+                    }
+                } else {
+                    sonicGroup.rotation.z += 0.05;
+                    if (Math.abs(velocityX) > 0.01) {
+                        const targetAngle = velocityX * 0.5;
+                        let diff = targetAngle - sonicGroup.rotation.y;
+                        while (diff > Math.PI) diff -= Math.PI * 2;
+                        while (diff < -Math.PI) diff += Math.PI * 2;
+                        sonicGroup.rotation.y += diff * 0.06;
+                    }
+                }
+
+                // Камера
+                const targetX = sonicGroup.position.x * 0.3;
+                const targetZ = sonicGroup.position.z + 8;
+                const targetY = 8 + Math.sin(frame * 0.01) * 0.5;
+                camera.position.x += (targetX - camera.position.x) * 0.03;
+                camera.position.z += (targetZ - camera.position.z) * 0.03;
+                camera.position.y += (targetY - camera.position.y) * 0.03;
+                camera.lookAt(sonicGroup.position.x * 0.2, 0.3, sonicGroup.position.z - 2);
+
+                // Индикатор скорости
+                const displaySpeed = Math.round(Math.abs(moveZ) * 100);
+                speedSpan.textContent = displaySpeed;
+            }
+
+            // --- РЕНДЕР ---
+            function animate() {
+                requestAnimationFrame(animate);
+                update();
+                renderer.render(scene, camera);
+            }
+
+            // --- РЕСАЙЗ ---
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+
+            // --- СТАРТ ---
+            loadData();
+            animate();
+
+            renderer.domElement.addEventListener('click', () => { if (!audioCtx) initAudio(); });
+
+        })();
+    </script>
+</body>
+</html>
